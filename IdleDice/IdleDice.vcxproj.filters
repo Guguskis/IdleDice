@@ -13,5 +13,45 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Library files">
+      <UniqueIdentifier>{2a6dd2d7-4ac5-4073-a844-807d0786f866}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Library files">
+      <UniqueIdentifier>{aed8d6e2-6d43-4340-9787-c8bfe3a42bb5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsLib.cpp">
+      <Filter>Source Files\Library files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLib.cpp">
+      <Filter>Source Files\Library files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsLib.h">
+      <Filter>Header Files\Library files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLib.h">
+      <Filter>Header Files\Library files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
