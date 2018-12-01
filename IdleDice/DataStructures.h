@@ -1,8 +1,7 @@
 #ifndef DATASTRUCTURES_H
 #define DATASTRUCTURES_H
 
-#include <string>
-#include <vector>
+#include "pch.h"
 using namespace std;
 
 struct Pixel {

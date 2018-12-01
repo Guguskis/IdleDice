@@ -1,10 +1,5 @@
 #pragma once
-#include <iostream>
-#include <conio.h>
-#include <Windows.h>
-#include <string>
-#include <vector>
-
+#include "pch.h"
 using namespace std;
 
 class InputLib

@@ -1,15 +1,11 @@
 #pragma once
-#include <thread>
-
-
-
-
+#include "pch.h"
 #include "GraphicsLib.h"
 
 class Core
 {
 private:
-	int mHeight = 20, mWidth = 30, mLayers = 2;
+	int mHeight = 40, mWidth = 60, mLayers = 2;
 	int mCurrLayer=0;
 	bool mGameIsRunning = true;
 

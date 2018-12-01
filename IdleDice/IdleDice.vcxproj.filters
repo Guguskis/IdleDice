@@ -9,32 +9,34 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{4f824497-b13c-4c2e-a61b-2afdcbea8e08}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Library files">
-      <UniqueIdentifier>{2a6dd2d7-4ac5-4073-a844-807d0786f866}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Library files">
-      <UniqueIdentifier>{aed8d6e2-6d43-4340-9787-c8bfe3a42bb5}</UniqueIdentifier>
+    <Filter Include="Precompiled Header">
+      <UniqueIdentifier>{568ce717-c040-48ae-a84d-4c23eaf7cf7e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
     <ClCompile Include="Dice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GraphicsLib.cpp">
-      <Filter>Source Files\Library files</Filter>
+      <Filter>Libraries</Filter>
     </ClCompile>
     <ClCompile Include="InputLib.cpp">
-      <Filter>Source Files\Library files</Filter>
+      <Filter>Libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Precompiled Header</Filter>
+    </ClCompile>
+    <ClCompile Include="Logging.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -48,10 +50,16 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsLib.h">
-      <Filter>Header Files\Library files</Filter>
+      <Filter>Libraries</Filter>
     </ClInclude>
     <ClInclude Include="InputLib.h">
-      <Filter>Header Files\Library files</Filter>
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Precompiled Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Logging.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

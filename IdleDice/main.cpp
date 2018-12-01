@@ -1,14 +1,7 @@
-#include <iostream>
-#include <Windows.h>
-#include <vector>
-#include <string>
-#include <iomanip>
-#include <thread>
-#include <conio.h>
-#include <thread>
-
+#include "pch.h"
 #include "Core.h"
 #include "GraphicsLib.h"
+
 using namespace std;
 
 /*

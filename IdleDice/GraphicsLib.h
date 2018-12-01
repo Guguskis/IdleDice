@@ -1,13 +1,7 @@
 #pragma once
-#include <iostream>
-#include <iomanip>
-#include <Windows.h>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <algorithm>
-
+#include "pch.h"
 #include "DataStructures.h"
+#include "Logging.h"
 
 class GraphicsLib
 {
@@ -23,11 +17,15 @@ private:
 	*/
 	static vector<vector<vector<Pixel>>> *mCurrFrame, *mLastFrame;
 	static int* mCurrLayer;
-	static int mLastLayer;
+	static int mLastLayer, mHeight, mWidth;
+	
+
 	static void DrawPixel(int, int, char, int, int);
+	static void InsertPixel(int, int, int, char, int, int);
 	static bool NeedUpdatePixel(int, int, char, int, int);
 
 public:
+	static void InsertTextBox(int, int, int, string, int, int, int, int);
 	static void SetData(int, int, int, int*);
 	static void DrawScreen();
 
