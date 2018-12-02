@@ -36,7 +36,8 @@ void InputLib::GetInput() {
 		KEY_DOWN = 80,
 		//Command keys
 		KEY_ENTER = 13,
-		KEY_ESC = 27
+		KEY_ESC = 27,
+		KEY_SPACE = 32,
 	};
 
 	int firstValue = _getch();
@@ -49,6 +50,7 @@ void InputLib::GetInput() {
 		mPressedKey value, but will exit this method. Thus, the last command will be
 		executed again in the next program loop. This is unwanted behaviour.
 	*/
+
 
 	//Reading function keys
 	if (firstValue == KEY_FUNCTION) {
@@ -78,5 +80,17 @@ void InputLib::GetInput() {
 	//Reading command keys
 	else if (firstValue == KEY_ENTER) { mPressedKey = "Enter"; }
 	else if (firstValue == KEY_ESC) { mPressedKey = "Esc"; }
+	else if (firstValue == KEY_SPACE) { mPressedKey = "Space"; }
+	//Reading normal keys
+	else if (firstValue == '0') { mPressedKey = "0"; }
+	else if (firstValue == '1') { mPressedKey = "1"; }
+	else if (firstValue == '2') { mPressedKey = "2"; }
+	else if (firstValue == '3') { mPressedKey = "3"; }
+	else if (firstValue == '4') { mPressedKey = "4"; }
+	else if (firstValue == '5') { mPressedKey = "5"; }
+	else if (firstValue == '6') { mPressedKey = "6"; }
+	else if (firstValue == '7') { mPressedKey = "7"; }
+	else if (firstValue == '8') { mPressedKey = "8"; }
+	else if (firstValue == '9') { mPressedKey = "9"; }
 	else { this->GetInput(); }
 }

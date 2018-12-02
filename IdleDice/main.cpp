@@ -7,6 +7,7 @@ using namespace std;
 /*
 	To do:
 		graphics library
+			finished at "I need to redraw whole screen where neccessary after changing layers" thing
 
 	Finished:
 		input library

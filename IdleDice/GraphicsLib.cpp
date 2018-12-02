@@ -2,62 +2,146 @@
 #include "GraphicsLib.h"
 
 //static members' definition
-vector<vector<vector<Pixel>>>* GraphicsLib::mCurrFrame = new vector<vector<vector<Pixel>>>(1);
-vector<vector<vector<Pixel>>>* GraphicsLib::mLastFrame = new vector<vector<vector<Pixel>>>(1);
-int GraphicsLib::mLastLayer = 0;
-int *GraphicsLib::mCurrLayer = new int(0);
+vector<Command> GraphicsLib::mCommand;
+vector<vector<Pixel>>* GraphicsLib::mCurrFrame = new vector<vector<Pixel>>(1);
+vector<vector<Pixel>>* GraphicsLib::mLastFrame = new vector<vector<Pixel>>(1);
 int GraphicsLib::mHeight = 0;
 int GraphicsLib::mWidth = 0;
 /*********************WORKING ON*********************/
 
+
+
+
 void GraphicsLib::Test() {
 
-	int money = 0;
-	auto start = chrono::system_clock::now();
-	Logging log;
-	
-
-	while (money<200) {
-		auto end = chrono::system_clock::now();
-		std::chrono::duration<double> elapsed = end - start;
-		GraphicsLib::InsertTextBox(5, 5, 0, "Time: " + to_string(elapsed.count()), 3, 20, col_black, col_white);
-		GraphicsLib::InsertTextBox(10, 5, 0, "Money: " + to_string(money), 3, 20, col_black, col_white);
-		DrawScreen();
-		
-		money++;
-	}
 }
 
+
+
+/*********************FINISHED*********************/
 
 void GraphicsLib::DrawScreen() {
-#define currPixel GraphicsLib::mCurrFrame->at(*GraphicsLib::mCurrLayer)[i][j]
-#define zeroLayerPixel GraphicsLib::mCurrFrame->at(0)[i][j]
+	//display whole screen
+	if (mCommand.size() == 0) return;
 
-	//Might want to have fixed current frame value
+	HandleCommands();
 
-	for (int i = 0; i < GraphicsLib::mCurrFrame->at(*GraphicsLib::mCurrLayer).size(); i++) {
-		for (int j = 0; j < GraphicsLib::mCurrFrame->at(*GraphicsLib::mCurrLayer)[i].size(); j++) {
-			//will need to check whether this works
-			//It should update pixel if it's visible in that layer, else update with layer zero pixel
-			if (currPixel.visible) DrawPixel(i, j, currPixel.symb, currPixel.bgCol, currPixel.fgCol);
-			else DrawPixel(i, j, zeroLayerPixel.symb, zeroLayerPixel.bgCol, zeroLayerPixel.fgCol);
+	for (int i = 0; i < mHeight; i++) {
+		for (int j = 0; j < mWidth; j++) {
+			DrawPixel(i, j, &mCurrFrame->at(i)[j]);
 		}
 	}
 
-	//saving current values
-	for (int k = 0; k < mCurrFrame->size(); k++) {
-		for (int i = 0; i < mCurrFrame->at(k).size(); i++) {
-			for (int j = 0; j < mCurrFrame->at(k)[i].size(); j++) {
-				mLastFrame->at(k)[i][j] = mCurrFrame->at(k)[i][j];
-			}
-		}
+	//saving current frame
+	for (int i = 0; i < mHeight; i++) {
+		for (int j = 0; j < mWidth; j++)
+			mLastFrame->at(i)[j] = mCurrFrame->at(i)[j];
 	}
-	GraphicsLib::mLastLayer = *GraphicsLib::mCurrLayer;
+
 }
-/*********************FINISHED*********************/
-void GraphicsLib::DrawPixel(int y, int x, char symb, int bgCol, int fgCol) {
-#define lastPixel GraphicsLib::mLastFrame->at(GraphicsLib::mLastLayer)[y][x]
-	if (!NeedUpdatePixel(y, x, symb, bgCol, fgCol)) return;
+void GraphicsLib::ClearScreen() {
+	//display black screen
+	for (int i = 0; i < mHeight; i++) {
+		for (int j = 0; j < mWidth; j++) {
+			InsertPixel(i, j, ' ', col_black, col_black);
+		}
+	}
+}
+
+void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> *arr){
+	//parse InsertArray command to command vector
+	Command comm;
+	comm.type = "Array";
+	comm.y = y;
+	comm.x = x;
+	comm.arr = arr;
+	mCommand.push_back(comm);
+}
+void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width, int bgCol, int fgCol){
+	//parse InsertTextBox command to command vector
+	Command comm;
+	comm.text = "TextBox";
+	comm.y = y;
+	comm.x = x;
+	comm.text = text;
+	comm.height= height;
+	comm.width= width;
+	comm.bgCol= bgCol;
+	comm.fgCol= fgCol;
+	mCommand.push_back(comm);
+}
+void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol){
+	//parse InsertLine command to command vector
+	Command comm;
+	comm.type = "Line";
+	comm.y = y;
+	comm.x = x;
+	comm.text = text;
+	comm.bgCol = bgCol;
+	comm.fgCol = fgCol;
+	mCommand.push_back(comm);
+}
+
+void GraphicsLib::HandleCommands() {
+	//execute pending commands
+	Logging::Log(mCommand.size());	
+#define c mCommand[0]
+	while(mCommand.size()!=0) {
+		if (c.type == "Line") HandleLine(c.y, c.x, c.text, c.bgCol, c.fgCol);
+		else if (c.type == "TextBox") HandleTextBox(c.y, c.y, c.text, c.height, c.width, c.bgCol, c.fgCol);
+		else if (c.type == "Array") HandleArray(c.y, c.x, mCommand[0].arr);
+		mCommand.erase(mCommand.begin());
+	}
+}
+void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>>* arr) {
+	//display given array on screen
+	for (int i = y; i < y + arr->size(); i++) {
+		for (int j = x; j < x + arr->at(0).size(); j++) {
+			InsertPixel(i, j, arr->at(i)[j].symb, arr->at(i)[j].bgCol, arr->at(i)[j].fgCol);
+		}
+	}
+}
+void GraphicsLib::HandleTextBox(int y, int x, string text, int height, int width, int bgCol, int fgCol) {
+	//Split given text into array of lines and display it
+	stringstream ss(text);
+	string word;
+	vector<string> textBox(1);
+
+	//protection
+	if (width <= 0 || height <= 0) return;
+
+#define lastLine textBox[textBox.size()-1]
+	//adding text
+	for (int i = 0; i < text.length(); i++) {
+		if (lastLine.size() >= width) textBox.push_back(string());
+		lastLine += text[i];
+	}
+
+	//making lines to be equal size
+	for (int i = 0; i < height; i++) {
+		if (textBox.size() < i) textBox.push_back(string());
+			textBox[i] += string(width - textBox[i].size(), ' ');
+	}
+
+	//inserting text box
+	for (int i = 0; i < height; i++) {
+		HandleLine(y + i, x, textBox[i], bgCol, fgCol);
+	}
+
+#undef lastLine
+}
+void GraphicsLib::HandleLine(int y, int x, string text, int bgCol, int fgCol) {
+	//display text line on screen
+	for (int i = 0; i < text.length(); i++) {
+		InsertPixel(y, x + i, text[i], bgCol, fgCol);
+	}
+}
+
+void GraphicsLib::DrawPixel(int y, int x, Pixel * pixel) {
+	//displays given pixel on screen
+	//exit, if pixel doesn't need update
+	if (!pixel->update) return;
+
 	//Goto 
 	COORD coord;
 	coord.Y = y;
@@ -65,78 +149,47 @@ void GraphicsLib::DrawPixel(int y, int x, char symb, int bgCol, int fgCol) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
 	//Set color
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), bgCol * 16 + fgCol);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), pixel->bgCol * 16 + pixel->fgCol);
 
 	//Output symbol
-	cout << symb;
+	cout << pixel->symb;
 
 	//Change color back to black
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);
-
+	pixel->update = false;
 }
-void GraphicsLib::InsertPixel(int y, int x, int layer, char symb, int bgCol, int fgCol) {
-#define pixel mCurrFrame->at(layer)[y][x]
-	//exit if coordinates or layer are out of bounds
-	if (y < 0 || y >= mCurrFrame->at(0).size() || x < 0 || x >= mCurrFrame->at(0)[0].size() ||
-		layer < 0 || layer >= mCurrFrame->size()) return;
+void GraphicsLib::InsertPixel(int y, int x, char symb, int bgCol, int fgCol) {
+	//change the values of pixel at given coordinates
+#define pixel1 mCurrFrame->at(y)[x]
+	//exit if coordinates are out of bounds
+	if (y < 0 || y >= mHeight || x < 0 || x >= mWidth) return;
 
-	pixel.symb = symb;
-	pixel.bgCol = bgCol;
-	pixel.fgCol = fgCol;
-	pixel.visible = true;
-}
-bool GraphicsLib::NeedUpdatePixel(int y, int x, char symb, int bgCol, int fgCol) {
-#define lastPixel GraphicsLib::mLastFrame->at(GraphicsLib::mLastLayer)[y][x]
-	//if curr and last pixels are spaces and bgCol matches
-	if (symb == ' ' && lastPixel.symb == ' ' && bgCol == lastPixel.bgCol) false;
-	//if curr and last pixels are not spaces, then exit if their symb, bgCol and fgCol match
-	else if (symb == lastPixel.symb && bgCol == lastPixel.bgCol && fgCol == lastPixel.fgCol) false;
-	else return true;
-}
-void GraphicsLib::InsertTextBox(int y, int x, int layer, string text, int height, int width, int bgCol, int fgCol) {
-	//Split given text into array of lines of width length and insert into frame
-	stringstream ss(text);
-	string word;
-	vector<string> textBox(1);
+	Pixel pixel2;
+	pixel2.symb = symb;
+	pixel2.bgCol = bgCol;
+	pixel2.fgCol = fgCol;
 
-	//protection
-	if (width == 0 || height == 0) return;
-
-#define lastLine textBox[textBox.size()-1]
-	while (ss >> word) {
-		//if word is big
-		if (word.length() >= width / 2) {
-			for (int i = 0; i < word.length(); i++) {
-				if (lastLine.size() >= width) textBox.push_back(string());
-				lastLine += word[i];
-			}
-			lastLine += " ";
-		}
-		else {
-			if (lastLine.size() + word.size() > width) textBox.push_back(string());
-			lastLine += word+" ";
-		}
+	if (NeedUpdatePixel(&pixel1, &pixel2)) {
+		pixel1.update = true;
+		pixel1.symb = symb;
+		pixel1.bgCol = bgCol;
+		pixel1.fgCol = fgCol;
 	}
-
-	textBox.resize(height);
-
-	for (int i = 0; i < height; i++)
-		textBox[i] += string(max(0, width - textBox[i].size()), ' ');
-
-	Logging log;
-	
-	log.Log(textBox.size());
-
-	for (int i = y; i < min(y + height, mHeight); i++) {
-
-		for (int j = x; j < min(x + textBox[i-y].size(), mWidth); j++) {
-				GraphicsLib::InsertPixel(i, j, layer, textBox[i-y][j-x], bgCol, fgCol);
-		}
-	}
-
-
+#undef pixel
 }
-void GraphicsLib::SetData(int height, int width, int layerCount, int* currentLayer) {
+bool GraphicsLib::NeedUpdatePixel(const Pixel * cPixel, const Pixel * lPixel) {
+	//check if two pixels are different. If yes, return true, else return false
+
+	//if (cPixel->symb == ' ') {
+	//	if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol) return true;
+	//}
+	//else if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol || cPixel->fgCol != lPixel->fgCol) return true;
+
+	if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol || cPixel->fgCol != lPixel->fgCol) return true;
+	else return false;
+}
+
+void GraphicsLib::SetData(int height, int width) {
 	//creating line container
 	vector<Pixel> line(width);
 	//creating grid container
@@ -144,19 +197,10 @@ void GraphicsLib::SetData(int height, int width, int layerCount, int* currentLay
 	//setting data
 	delete GraphicsLib::mCurrFrame;
 	delete GraphicsLib::mLastFrame;
-	GraphicsLib::mCurrFrame = new vector<vector<vector<Pixel>>>(layerCount, screen);
-	GraphicsLib::mLastFrame = new vector<vector<vector<Pixel>>>(layerCount, screen);
+	mCurrFrame = new vector<vector<Pixel>>(screen);
+	mLastFrame = new vector<vector<Pixel>>(screen);
 
-	GraphicsLib::mCurrLayer = currentLayer;
+	mHeight = height;
+	mWidth = width;
 
-	GraphicsLib::mHeight = height;
-	GraphicsLib::mWidth = width;
-
-	//setting layer zero to visible
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			mCurrFrame->at(0)[i][j].visible = true;
-			mLastFrame->at(0)[i][j].visible = true;
-		}
-	}
 }

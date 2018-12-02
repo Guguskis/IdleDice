@@ -7,9 +7,9 @@ class InputLib
 private:
 	string mPressedKey;
 protected:
+public:
 	void GetInput();
 	bool KeyPressed(string);
-public:
 	void Test();
 	void TestKeys();
 };

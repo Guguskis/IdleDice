@@ -11,8 +11,9 @@ struct Pixel {
 	*/
 	char symb=' ';
 	int bgCol = 0, fgCol = 7;
-	bool visible = false;
+	bool update = true;
 };
+
 enum {
 	col_black=0,
 	col_darkBlue=1,
@@ -30,5 +31,12 @@ enum {
 	col_pink=13,
 	col_yellow=14,
 	col_white=15,
+};
+
+struct Command {
+	string type;
+	int y, x, bgCol, fgCol, height, width;
+	string text;
+	vector<vector<Pixel>> *arr;
 };
 #endif
