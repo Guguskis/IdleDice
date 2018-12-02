@@ -12,7 +12,7 @@ void Core::HandleGraphics(){
 }
 void Core::HandleInput(){
 	InputLib input;
-	
+	/*
 	while (mGameIsRunning) {
 		input.GetInput();
 
@@ -23,7 +23,7 @@ void Core::HandleInput(){
 		else if (input.KeyPressed("3")) InsertTextBox(3, 0, string(25, ' '), 1, 25, col_red, col_red);
 		else if (input.KeyPressed("4")) InsertTextBox(4, 0, string(25, ' '), 1, 25, col_red, col_red);
 
-	}
+	}*/
 }
 
 void Core::Test() {
@@ -40,6 +40,7 @@ void Core::Test() {
 
 	vector<vector<Pixel>> arr(mHeight, vector<Pixel>(mWidth));
 	int y = 0, x = 0;
+	InputLib input;
 	while (mGameIsRunning) {
 		/*auto end = chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = end - start;
@@ -52,13 +53,19 @@ void Core::Test() {
 				if (i == y && j == x) arr[i][j].bgCol = col_yellow;
 				else if (i == y) arr[i][j].bgCol = col_red;
 				else if (j == x) arr[i][j].bgCol = col_blue;
-				else arr[i][j].bgCol = col_black;
+				//else arr[i][j].bgCol = col_black;
 			}
 		}
 		InsertArray(0, 0, &arr);
-		y = (y + 1) % mHeight;
-		x = (x + 1) % mWidth;
-		Sleep(100);
+
+		input.GetInput();
+		if(input.KeyPressed("Left"))	x = (x - 1) % mWidth;
+		if(input.KeyPressed("Right"))	x = (x + 1) % mWidth;
+		if(input.KeyPressed("Up"))		y = (y - 1) % mHeight;
+		if(input.KeyPressed("Down"))	y = (y + 1) % mHeight;
+		if (input.KeyPressed("Esc")) mGameIsRunning = false;
+		if (y < 0) y = mHeight - 1;
+		if (x < 0) x = mWidth - 1;
 	}
 
 }

@@ -84,7 +84,6 @@ void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol){
 
 void GraphicsLib::HandleCommands() {
 	//execute pending commands
-	Logging::Log(mCommand.size());	
 #define c mCommand[0]
 	while(mCommand.size()!=0) {
 		if (c.type == "Line") HandleLine(c.y, c.x, c.text, c.bgCol, c.fgCol);

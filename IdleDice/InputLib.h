@@ -5,11 +5,10 @@ using namespace std;
 class InputLib
 {
 private:
-	string mPressedKey;
-protected:
+	static string mPressedKey;
 public:
 	void GetInput();
-	bool KeyPressed(string);
+	static bool KeyPressed(string);
 	void Test();
 	void TestKeys();
 };

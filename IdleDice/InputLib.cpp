@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "InputLib.h"
 
+string InputLib::mPressedKey;
 
 void InputLib::TestKeys() {
 	while (1) {
