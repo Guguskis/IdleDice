@@ -7,6 +7,7 @@ vector<vector<Pixel>>* GraphicsLib::mCurrFrame = new vector<vector<Pixel>>(1);
 vector<vector<Pixel>>* GraphicsLib::mLastFrame = new vector<vector<Pixel>>(1);
 int GraphicsLib::mHeight = 0;
 int GraphicsLib::mWidth = 0;
+bool GraphicsLib::mCommandInUse = false;
 /*********************WORKING ON*********************/
 
 
@@ -48,13 +49,14 @@ void GraphicsLib::ClearScreen() {
 	}
 }
 
-void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> *arr){
+void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> arr){
 	//parse InsertArray command to command vector
 	Command comm;
 	comm.type = "Array";
 	comm.y = y;
 	comm.x = x;
 	comm.arr = arr;
+	while (mCommandInUse) Sleep(1);
 	mCommand.push_back(comm);
 }
 void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width, int bgCol, int fgCol){
@@ -68,6 +70,7 @@ void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width
 	comm.width= width;
 	comm.bgCol= bgCol;
 	comm.fgCol= fgCol;
+	while (mCommandInUse) Sleep(1);
 	mCommand.push_back(comm);
 }
 void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol){
@@ -79,24 +82,28 @@ void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol){
 	comm.text = text;
 	comm.bgCol = bgCol;
 	comm.fgCol = fgCol;
+	//wait while commands are being executed
+	while (mCommandInUse) Sleep(1);
 	mCommand.push_back(comm);
 }
 
 void GraphicsLib::HandleCommands() {
 	//execute pending commands
-#define c mCommand[0]
-	while(mCommand.size()!=0) {
+#define c mCommand[i]
+	mCommandInUse = true;
+	for(int i=0; i<mCommand.size(); i++) {
 		if (c.type == "Line") HandleLine(c.y, c.x, c.text, c.bgCol, c.fgCol);
 		else if (c.type == "TextBox") HandleTextBox(c.y, c.y, c.text, c.height, c.width, c.bgCol, c.fgCol);
-		else if (c.type == "Array") HandleArray(c.y, c.x, mCommand[0].arr);
-		mCommand.erase(mCommand.begin());
+		else if (c.type == "Array") HandleArray(c.y, c.x, c.arr);
 	}
+	mCommand.clear();
+	mCommandInUse = false;
 }
-void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>>* arr) {
+void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>> arr) {
 	//display given array on screen
-	for (int i = y; i < y + arr->size(); i++) {
-		for (int j = x; j < x + arr->at(0).size(); j++) {
-			InsertPixel(i, j, arr->at(i)[j].symb, arr->at(i)[j].bgCol, arr->at(i)[j].fgCol);
+	for (int i = y; i < y + arr.size(); i++) {
+		for (int j = x; j < x + arr.at(0).size(); j++) {
+			InsertPixel(i, j, arr.at(i)[j].symb, arr.at(i)[j].bgCol, arr.at(i)[j].fgCol);
 		}
 	}
 }
@@ -168,24 +175,51 @@ void GraphicsLib::InsertPixel(int y, int x, char symb, int bgCol, int fgCol) {
 	pixel2.bgCol = bgCol;
 	pixel2.fgCol = fgCol;
 
-	if (NeedUpdatePixel(&pixel1, &pixel2)) {
+	if (NeedUpdatePixel(&pixel2, &pixel1)) {
+		if (y == 0 && x == 0) {
+			Logging::Log(y, x);
+		}
 		pixel1.update = true;
-		pixel1.symb = symb;
-		pixel1.bgCol = bgCol;
-		pixel1.fgCol = fgCol;
+		if(symb!=-1) pixel1.symb = symb;
+		if(bgCol!=col_noColor)	pixel1.bgCol = bgCol;
+		if(fgCol!=col_noColor)	pixel1.fgCol = fgCol;
 	}
 #undef pixel
 }
-bool GraphicsLib::NeedUpdatePixel(const Pixel * cPixel, const Pixel * lPixel) {
+bool GraphicsLib::NeedUpdatePixel(const Pixel * cpx, const Pixel * lpx) {
+	/*
+		cpx - current pixel
+		lpx - last pixel
+	*/
 	//check if two pixels are different. If yes, return true, else return false
 
-	//if (cPixel->symb == ' ') {
-	//	if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol) return true;
+	//if (cpx->symb == ' ') {
+	//	if (cpx->symb != lpx->symb || cpx->bgCol != lpx->bgCol) return true;
 	//}
-	//else if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol || cPixel->fgCol != lPixel->fgCol) return true;
-
-	if (cPixel->symb != lPixel->symb || cPixel->bgCol != lPixel->bgCol || cPixel->fgCol != lPixel->fgCol) return true;
+	//else if (cpx->symb != lpx->symb || cpx->bgCol != lpx->bgCol || cpx->fgCol != lpx->fgCol) return true;
+	if (cpx->symb == lpx->symb && cpx->bgCol == lpx->bgCol && cpx->fgCol == lpx->fgCol) return false;
+	else if (cpx->bgCol == col_noColor && lpx->fgCol == col_noColor) {
+		if (cpx->symb != lpx->symb) return true;
+		else return false;
+	}
+	else if (cpx->bgCol == col_noColor) {
+		if (cpx->symb == ' ' && lpx->symb == ' ') return false;
+		else if (cpx->symb != lpx->symb || cpx->fgCol != lpx->fgCol) return true;
+		else return false;
+	}
+	else if (cpx->fgCol == col_noColor) {
+		if (cpx->symb == ' ' && lpx->symb == ' ' && cpx->bgCol==lpx->bgCol) return false;
+		else if (cpx->symb != lpx->symb || cpx->bgCol != lpx->bgCol) return true;
+		else return false;
+	}
+	else {
+		if (cpx->symb == ' ' && lpx->symb == ' ' && cpx->bgCol == cpx->fgCol) return false;
+		else return true;
+	}
+/*
+	if (cpx->symb != lpx->symb || cpx->bgCol != lpx->bgCol || cpx->fgCol != lpx->fgCol) return true;
 	else return false;
+*/
 }
 
 void GraphicsLib::SetData(int height, int width) {

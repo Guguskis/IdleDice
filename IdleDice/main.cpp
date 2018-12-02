@@ -5,13 +5,15 @@
 using namespace std;
 
 /*
+	Last thing I did was redo graphics and input lib and made a tiny demonstration of those libraries
+
+
 	To do:
-		graphics library
-			finished at "I need to redraw whole screen where neccessary after changing layers" thing
+		game
 
 	Finished:
 		input library
-		graphics handler (will need to rename from library) 
+		graphics library
 */
 
 

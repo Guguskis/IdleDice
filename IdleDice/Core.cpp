@@ -2,15 +2,32 @@
 #include "Core.h"
 
 
-void Core::HandleGraphics(){
+void Core::HandleGraphics() {
 	//this method handles graphics.
 	//TODO: should also execute calculations
 
+
+	auto start = chrono::system_clock::now();
+	
+	auto startFpsCounter = chrono::system_clock::now();
+	auto startFrame = chrono::system_clock::now();
+	int framesDrawn = 0;
+
 	while (mGameIsRunning) {
+		startFrame = chrono::system_clock::now();
+
 		GraphicsLib::DrawScreen();
+		
+		auto elapsedFrame = chrono::system_clock::now() - startFrame;
+
+		while (elapsedFrame.count() < 1.0f / mFPS) {
+			Sleep(1);
+			elapsedFrame = chrono::system_clock::now() - startFrame;
+		}
+
 	}
 }
-void Core::HandleInput(){
+void Core::HandleInput() {
 	InputLib input;
 	/*
 	while (mGameIsRunning) {
@@ -34,6 +51,8 @@ void Core::Test() {
 
 	Core::GameLoop();
 
+	thread graphicsWorker(&Core::HandleGraphics, this);
+	thread inputWorker(&Core::HandleInput, this);
 
 	int money = 0;
 	auto start = chrono::system_clock::now();
@@ -41,44 +60,48 @@ void Core::Test() {
 	vector<vector<Pixel>> arr(mHeight, vector<Pixel>(mWidth));
 	int y = 0, x = 0;
 	InputLib input;
+
+
 	while (mGameIsRunning) {
-		/*auto end = chrono::system_clock::now();
-		std::chrono::duration<double> elapsed = end - start;
-		money++;
-		GraphicsLib::InsertTextBox(10, 0, to_string(elapsed.count()), 1, 10, col_black, col_yellow);
-		GraphicsLib::InsertTextBox(11, 0, to_string(money), 1, 10, col_black, col_yellow);
-*/
+
 		for (int i = 0; i < mHeight; i++) {
 			for (int j = 0; j < mWidth; j++) {
-				if (i == y && j == x) arr[i][j].bgCol = col_yellow;
+				if (i == y && j == x) arr[i][j].bgCol = col_green;
 				else if (i == y) arr[i][j].bgCol = col_red;
-				else if (j == x) arr[i][j].bgCol = col_blue;
-				//else arr[i][j].bgCol = col_black;
+				else if (j == x) arr[i][j].bgCol = col_red;
+				else arr[i][j].bgCol = col_black;
+				arr[i][j].fgCol = col_noColor;
 			}
 		}
-		InsertArray(0, 0, &arr);
+		InsertArray(0, 0, arr);
 
 		input.GetInput();
-		if(input.KeyPressed("Left"))	x = (x - 1) % mWidth;
-		if(input.KeyPressed("Right"))	x = (x + 1) % mWidth;
-		if(input.KeyPressed("Up"))		y = (y - 1) % mHeight;
-		if(input.KeyPressed("Down"))	y = (y + 1) % mHeight;
-		if (input.KeyPressed("Esc")) mGameIsRunning = false;
-		if (y < 0) y = mHeight - 1;
-		if (x < 0) x = mWidth - 1;
+		
+		if (InputLib::KeyPressed("Left"))	x = (x - 1) % mWidth;
+		else if (InputLib::KeyPressed("Right"))	x = (x + 1) % mWidth;
+		else if (InputLib::KeyPressed("Down"))	y = (y + 1) % mHeight;
+		else if (InputLib::KeyPressed("Up"))	y = (y - 1) % mHeight;
+		else if (InputLib::KeyPressed("Esc")) mGameIsRunning = false;
+		if (y < 0) y += mHeight;
+		if (x < 0) x += mWidth;
+
 	}
 
+	graphicsWorker.join();
+	inputWorker.join();
 }
 
-void Core::GameLoop(){
+void Core::GameLoop() {
 	//This method is used to run the game. It runs graphics and input on seperate threads
-	thread graphicsWorker(&Core::HandleGraphics, this);
+
+	/*thread graphicsWorker(&Core::HandleGraphics, this);
 	thread inputWorker(&Core::HandleInput, this);
 	graphicsWorker.detach();
 	inputWorker.detach();
+*/
 }
 
 
-Core::Core(){
+Core::Core() {
 	GraphicsLib::SetData(mHeight, mWidth);
 }

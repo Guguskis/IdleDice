@@ -8,8 +8,8 @@ class Core:
 	private Logging
 {
 private:
-	int mHeight = 10, mWidth = 10;
-	int mFPS = 30;
+	int mHeight = 20, mWidth = 30;
+	int mFPS = 5;
 
 	bool mGameIsRunning = true;
 

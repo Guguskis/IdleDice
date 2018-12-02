@@ -9,12 +9,13 @@ struct Pixel {
 		symb - displayed symbol
 		bgCol, fgCol - background and symbol colors respectively
 	*/
-	char symb=' ';
+	char symb=-1;
 	int bgCol = 0, fgCol = 7;
 	bool update = true;
 };
 
 enum {
+	col_noColor=-1,
 	col_black=0,
 	col_darkBlue=1,
 	col_darkGreen=2,
@@ -37,6 +38,6 @@ struct Command {
 	string type;
 	int y, x, bgCol, fgCol, height, width;
 	string text;
-	vector<vector<Pixel>> *arr;
+	vector<vector<Pixel>> arr;
 };
 #endif
