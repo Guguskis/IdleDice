@@ -9,11 +9,13 @@ using namespace std;
 
 
 	To do:
+		improve stability for graphics library
 		game
 
 	Finished:
 		input library
 		graphics library
+		FPS counter
 */
 
 
