@@ -11,22 +11,27 @@ private:
 	static vector<vector<Pixel>> *mCurrFrame, *mLastFrame;
 	static int mHeight, mWidth;
 	static bool mCommandInUse;
+	static bool mFrameRateOn;
+	static mutex mMutexCommand;
 
-	static void HandleLine(int, int, string, int, int);
-	static void HandleTextBox(int, int, string, int, int, int, int);
-	static void HandleArray(int, int, const vector<vector<Pixel>>);
 
 	static void HandleCommands();
+	static void HandleArray(int, int, const vector<vector<Pixel>>);
+	static void HandleTextBox(int, int, string, int, int, int, int);
+	static void HandleLine(int, int, string, int, int);
+	static void HandlePixel(int, int, char, int, int);
+
 	static void DrawPixel(int, int, Pixel *);
-	static void InsertPixel(int, int, char, int, int);
 	static bool NeedUpdatePixel(const Pixel *, const Pixel *);
 
 public:
-	static void InsertLine(int, int, string, int, int);
-	static void InsertTextBox(int, int, string, int, int, int, int);
 	static void InsertArray(int, int, vector<vector<Pixel>>);
+	static void InsertTextBox(int, int, string, int, int, int, int);
+	static void InsertLine(int, int, string, int, int);
+	static void InsertPixel(int, int, char, int, int);
 
 	static void Test();
+	static void HandleGraphics(int*, bool*);
 	static void DrawScreen();
 	static void ClearScreen();
 

@@ -117,14 +117,10 @@ void TestCodeCount(int n) {
 
 }
 int main() {
-/*
-	thread graphics(RollDices);
-	thread input(GetInput);
-	
-	graphics.join();
-	input.join();*/
-	
-	Core core;
-	core.Test();
 
+	Core core;
+	//RollDices();
+	//core.Test();
+	core.Demo();
+	
 }

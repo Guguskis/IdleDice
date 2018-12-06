@@ -5,12 +5,15 @@
 #include <map>
 #include <string>
 
+//Multithreading
+#include <thread>
+#include <mutex>
+
 //Other
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <Windows.h>
-#include <thread>
 #include <algorithm>
 #include <conio.h>
 #include <iomanip>
