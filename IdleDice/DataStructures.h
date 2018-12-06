@@ -31,7 +31,7 @@ struct Pixel {
 		bgCol, fgCol - background and symbol colors respectively
 	*/
 	char symb=symb_noSymbol;
-	int bgCol = 0, fgCol = 7;
+	int bgCol = col_noColor, fgCol = col_noColor;
 
 };
 

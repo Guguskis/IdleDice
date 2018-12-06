@@ -38,10 +38,13 @@ void Core::Demo(){
 	int y = 0, x = 0;
 
 	auto spawnSymbols = [](vector<vector<Pixel>> *arr, int height, int width, bool *gameIsRunning) {
+		int commandsExecuted = 0;
 		while(*gameIsRunning){
 			int y = rand() % (height-2)+1;
 			int x = rand() % (width-2)+1;
 			GraphicsLib::InsertLine(y, 1 , string(width-2, 'a' + rand() % ('z' - 'a')), col_noColor, rand()%16);
+			commandsExecuted++;
+			if (commandsExecuted % 100 == 0) GraphicsLib::InsertClearScreen();
 			Sleep(60);
 		}
 	};

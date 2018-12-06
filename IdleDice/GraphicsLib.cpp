@@ -14,10 +14,13 @@ mutex GraphicsLib::mMutexCommand;
 
 
 
-
 void GraphicsLib::Test() {
 
 }
+
+
+
+/*********************FINISHED*********************/
 
 void GraphicsLib::HandleGraphics(int *fps, bool *gameIsRunning){
 
@@ -25,7 +28,7 @@ void GraphicsLib::HandleGraphics(int *fps, bool *gameIsRunning){
 	auto frameEnd = chrono::steady_clock::now();
 	auto counterStart = chrono::steady_clock::now();
 
-	int framesDrawn = 0;
+
 
 	while (*gameIsRunning) {
 		//applying given commands
@@ -37,8 +40,8 @@ void GraphicsLib::HandleGraphics(int *fps, bool *gameIsRunning){
 		frameEnd = chrono::steady_clock::now();
 		auto frameElapsedTime = chrono::duration_cast<chrono::milliseconds>(frameEnd - frameStart);
 
-		//draw frame if enough time has passed since last last frame was drawn
-		if (frameElapsedTime.count() > (1000.f / *fps)) {
+		//draw frame if enough time has passed since last frame was drawn
+		if (frameElapsedTime.count() >= (1000.f / *fps)) {
 
 			//drawing FPS counter on top-right screen
 			if (mFrameRateOn) {
@@ -47,10 +50,9 @@ void GraphicsLib::HandleGraphics(int *fps, bool *gameIsRunning){
 				auto counterElapsedTime = chrono::duration_cast<chrono::milliseconds>(counterEnd - counterStart);
 
 				//redraw fps counter if appropriate time period has passed since last execution
-				if (counterElapsedTime.count() > 1000.f) {
+				if (counterElapsedTime.count() >= 200.f) {
 					//storing frame rate as string and working out maximum framerate digit count
-					string frameRate = to_string(framesDrawn);
-					frameRate = to_string((int)(1000.f / frameElapsedTime.count()));
+					string frameRate = to_string((int)round(1000.f / frameElapsedTime.count()));
 					int numberLength = log10(*fps) + 1;
 
 					//equalizing frame rate length
@@ -59,28 +61,16 @@ void GraphicsLib::HandleGraphics(int *fps, bool *gameIsRunning){
 
 					//restart timer
 					counterStart = chrono::steady_clock::now();
-					framesDrawn = 0;
 				}
 			}
 
 			//drawing frame
 			DrawScreen();
-			framesDrawn++;
 			frameStart = chrono::steady_clock::now();
 		}
-
-		/*
-			might need this sleep to reduce possibility of crash
-		*/
-		//Sleep(2);
 	}
 
 }
-
-
-
-/*********************FINISHED*********************/
-
 void GraphicsLib::DrawScreen() {
 	//display whole screen
 
@@ -98,15 +88,14 @@ void GraphicsLib::DrawScreen() {
 	}
 
 }
-void GraphicsLib::ClearScreen() {
-	//display black screen
-	for (int i = 0; i < mHeight; i++) {
-		for (int j = 0; j < mWidth; j++) {
-			HandlePixel(i, j, ' ', col_black, col_black);
-		}
-	}
-}
 
+void GraphicsLib::InsertClearScreen(){
+	Command comm;
+	comm.type = "ClearScreen";
+	
+	lock_guard<mutex> lock(mMutexCommand);
+	mCommand.push_back(comm);
+}
 void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> arr) {
 	//parse InsertArray command to command vector
 	Command comm;
@@ -115,9 +104,8 @@ void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> arr) {
 	comm.x = x;
 	comm.arr = arr;
 
-	mMutexCommand.lock();
+	lock_guard<mutex> lock(mMutexCommand);
 	mCommand.push_back(comm);
-	mMutexCommand.unlock();
 }
 void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width, int bgCol, int fgCol) {
 	//parse InsertTextBox command to command vector
@@ -131,9 +119,8 @@ void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width
 	comm.bgCol = bgCol;
 	comm.fgCol = fgCol;
 	
-	mMutexCommand.lock();
+	lock_guard<mutex> lock(mMutexCommand);
 	mCommand.push_back(comm);
-	mMutexCommand.unlock();
 }
 void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol) {
 	//parse InsertLine command to command vector
@@ -145,9 +132,8 @@ void GraphicsLib::InsertLine(int y, int x, string text, int bgCol, int fgCol) {
 	comm.bgCol = bgCol;
 	comm.fgCol = fgCol;
 	
-	mMutexCommand.lock();
+	lock_guard<mutex> lock(mMutexCommand);
 	mCommand.push_back(comm);
-	mMutexCommand.unlock();
 }
 void GraphicsLib::InsertPixel(int y, int x, char symb, int bgCol, int fgCol){
 	//parse InsertPixel command to command vector
@@ -159,24 +145,36 @@ void GraphicsLib::InsertPixel(int y, int x, char symb, int bgCol, int fgCol){
 	comm.bgCol = bgCol;
 	comm.fgCol = fgCol;
 
-	mMutexCommand.lock();
+	lock_guard<mutex> lock(mMutexCommand);
 	mCommand.push_back(comm);
-	mMutexCommand.unlock();
 }
 
 void GraphicsLib::HandleCommands() {
 	//execute pending commands
 #define c mCommand[i]
-	mMutexCommand.lock();
+	lock_guard<mutex> lock(mMutexCommand);
+
 	for (int i = 0; i < mCommand.size(); i++) {
 		if (c.type == "Line") HandleLine(c.y, c.x, c.text, c.bgCol, c.fgCol);
 		else if (c.type == "TextBox") HandleTextBox(c.y, c.x, c.text, c.height, c.width, c.bgCol, c.fgCol);
 		else if (c.type == "Array") HandleArray(c.y, c.x, c.arr);
 		else if (c.type == "Pixel") HandlePixel(c.y, c.x, c.text[0], c.bgCol, c.fgCol);
+		else if (c.type == "ClearScreen") HandleClearScreen();
 	}
 	mCommand.clear();
-	mMutexCommand.unlock();
 #undef c
+}
+void GraphicsLib::HandleClearScreen() {
+	//display black screen
+	for (int i = 0; i < mHeight; i++) {
+		for (int j = 0; j < mWidth; j++) {
+			Pixel blackPixel;
+			blackPixel.symb = ' ';
+			blackPixel.bgCol = col_black;
+			if (NeedUpdatePixel(&mCurrFrame->at(i)[j], &blackPixel));
+				HandlePixel(i, j, ' ', col_black, col_black);
+		}
+	}
 }
 void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>> arr) {
 	//display given array on screen
@@ -253,6 +251,7 @@ void GraphicsLib::DrawPixel(int y, int x, Pixel * pixel) {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);
 }
 bool GraphicsLib::NeedUpdatePixel(const Pixel * cpx, const Pixel * lpx) {
+	//checks if given pixels are different enough to redraw them
 	/*
 		cpx - current pixel
 		lpx - last pixel

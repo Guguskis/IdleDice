@@ -16,6 +16,7 @@ private:
 
 
 	static void HandleCommands();
+	static void HandleClearScreen();
 	static void HandleArray(int, int, const vector<vector<Pixel>>);
 	static void HandleTextBox(int, int, string, int, int, int, int);
 	static void HandleLine(int, int, string, int, int);
@@ -25,6 +26,7 @@ private:
 	static bool NeedUpdatePixel(const Pixel *, const Pixel *);
 
 public:
+	static void InsertClearScreen();
 	static void InsertArray(int, int, vector<vector<Pixel>>);
 	static void InsertTextBox(int, int, string, int, int, int, int);
 	static void InsertLine(int, int, string, int, int);
@@ -33,7 +35,6 @@ public:
 	static void Test();
 	static void HandleGraphics(int*, bool*);
 	static void DrawScreen();
-	static void ClearScreen();
 
 	static void SetData(int, int);
 };
