@@ -8,7 +8,7 @@ class Core:
 	private Logging
 {
 private:
-	int mHeight = 29, mWidth = 69;
+	int mHeight = 30, mWidth = 30;
 	int mFPS = 60;
 
 	bool mGameIsRunning = true;
@@ -19,9 +19,9 @@ private:
 private:
 
 public:
+	void HandleGraphics();
 	void HandleInput();
 	void Test();
-	void Demo();
 	Core();
 };
 

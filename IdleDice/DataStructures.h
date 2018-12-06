@@ -4,8 +4,17 @@
 #include "pch.h"
 using namespace std;
 
+struct Pixel {
+	/*
+		symb - displayed symbol
+		bgCol, fgCol - background and symbol colors respectively
+	*/
+	char symb=-1;
+	int bgCol = 0, fgCol = 7;
+	bool update = true;
+};
+
 enum {
-	symb_noSymbol=-1,
 	col_noColor=-1,
 	col_black=0,
 	col_darkBlue=1,
@@ -24,17 +33,6 @@ enum {
 	col_yellow=14,
 	col_white=15,
 };
-
-struct Pixel {
-	/*
-		symb - displayed symbol
-		bgCol, fgCol - background and symbol colors respectively
-	*/
-	char symb=symb_noSymbol;
-	int bgCol = 0, fgCol = 7;
-
-};
-
 
 struct Command {
 	string type;

@@ -2,7 +2,42 @@
 #include "Core.h"
 
 
+void Core::HandleGraphics() {
+	//this method handles graphics.
+	//TODO: should also execute calculations
 
+
+	auto startFpsCounter = chrono::steady_clock::now();
+	auto startFrame = chrono::steady_clock::now();
+	int framesDrawn = 0;
+
+	while (mGameIsRunning) {
+		//capture frame start time
+		startFrame = chrono::steady_clock::now();
+		//do the work
+		GraphicsLib::DrawScreen();
+		//measure end time
+		auto endFrame = chrono::steady_clock::now();
+
+		//control maximum frame rate
+		while (chrono::duration_cast<chrono::milliseconds>(endFrame-startFrame).count() < 1000.f / mFPS) {
+			Sleep(1);
+			endFrame = chrono::steady_clock::now();
+		}
+
+		//display fps every half second
+		auto endFpsCounter = chrono::steady_clock::now();
+		if (chrono::duration_cast<chrono::milliseconds>(endFpsCounter - startFpsCounter).count() > 500.f) {
+			//save momentary frames per second value as string: 1000 milliseconds / draw time of last frame
+			string displayFPS = to_string((int)round(1000.f / chrono::duration_cast<chrono::milliseconds>(endFrame - startFrame).count()));
+			//even the length
+			while (displayFPS.length() < 4) displayFPS += " ";
+			InsertLine(0, mWidth-4, displayFPS, col_noColor, col_green);
+			//restart timer
+			startFpsCounter = chrono::steady_clock::now();
+		}
+	}
+}
 void Core::HandleInput() {
 	InputLib input;
 	/*
@@ -22,43 +57,27 @@ void Core::HandleInput() {
 void Core::Test() {
 	//This method contains children class Test methods to make it easier to debug
 
-	
-}
+	//InputLib input;
+	//input.TestKeys();
 
-void Core::Demo(){
-	//demonstration of how to use graphics and input libraries and what they can do
-	//thread inputWorker(&Core::HandleInput, this);
-	
-	thread graphicsWorker(&GraphicsLib::HandleGraphics, &mFPS, &mGameIsRunning);
-	InputLib input;
+	thread graphicsWorker(&Core::HandleGraphics, this);
+	thread inputWorker(&Core::HandleInput, this);
+
 	int money = 0;
-
+	auto start = chrono::system_clock::now();
 
 	vector<vector<Pixel>> arr(mHeight, vector<Pixel>(mWidth));
 	int y = 0, x = 0;
-
-	auto spawnSymbols = [](vector<vector<Pixel>> *arr, int height, int width, bool *gameIsRunning) {
-		while(*gameIsRunning){
-			int y = rand() % (height-2)+1;
-			int x = rand() % (width-2)+1;
-			GraphicsLib::InsertLine(y, 1 , string(width-2, 'a' + rand() % ('z' - 'a')), col_noColor, rand()%16);
-			Sleep(60);
-		}
-	};
-
-	thread spawnSymbolWorker(spawnSymbols, &arr, mHeight, mWidth, &mGameIsRunning);
+	InputLib input;
 
 
 	while (mGameIsRunning) {
 
 		for (int i = 0; i < mHeight; i++) {
 			for (int j = 0; j < mWidth; j++) {
-				if (i == y && j == x && (j % 4 == 0 && i % 4 == 0)) arr[i][j].bgCol = col_red;
-				else if (i == y && j == x && ((j % 4 == 0 && i % 4 != 0) || (j % 4 != 0 && i % 4 == 0))) arr[i][j].bgCol = col_yellow;
-				else if (i == y && j == x) arr[i][j].bgCol = col_green;
-				else if (i == y && j % 4 == 0) arr[i][j].bgCol = col_grey;
-				else if (j == x && i % 4 == 0) arr[i][j].bgCol = col_grey;
-				else if (i == 0 || i == mHeight - 1 || j == 0 || j == mWidth - 1) arr[i][j].bgCol = col_cyan;
+				if (i == y && j == x) arr[i][j].bgCol = col_green;
+				else if (i == y && j % 4 == 0) arr[i][j].bgCol = col_red;
+				else if (j == x && i % 4 == 0) arr[i][j].bgCol = col_red;
 				else arr[i][j].bgCol = col_black;
 				arr[i][j].fgCol = col_noColor;
 			}
@@ -78,9 +97,8 @@ void Core::Demo(){
 
 	}
 
-	spawnSymbolWorker.join();
 	graphicsWorker.join();
-	//inputWorker.join();
+	inputWorker.join();
 }
 
 
@@ -88,5 +106,4 @@ void Core::Demo(){
 
 Core::Core() {
 	GraphicsLib::SetData(mHeight, mWidth);
-	srand(time(NULL));
 }
