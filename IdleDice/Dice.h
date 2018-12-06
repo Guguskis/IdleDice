@@ -9,6 +9,7 @@ class Dice
 private: 
 
 	static double *mAnimationTime;
+	static int normalDices, boosterDices;
 	/*
 		Types:
 			1. Normal
@@ -23,7 +24,10 @@ private:
 	int mRolledValue=1;
 	double mMultiplier=1.0f;
 
-	double buyCoef = 1.08f;
+	int boosterMaxRollValue = 2;
+
+	double normalBuyCoef = 1.08f;
+	double boosterBuyCoef = 1.08f;
 
 	vector<vector<vector<Pixel>>> mNormalGraphics, mBoosterGraphics;
 
@@ -36,8 +40,7 @@ public:
 
 	static double RollAllDices(vector<Dice> *);
 
-	double getThisMoney();
-	void RollThisDice();
+
 	void AnimateThisDice();
 	void InitializeGraphics();
 

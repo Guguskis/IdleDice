@@ -2,16 +2,24 @@
 #include "Dice.h"
 
 double* Dice::mAnimationTime = new double(1200.f);
+int Dice::normalDices = 0;
+int Dice::boosterDices = 0;
 
 /***********************STATIC METHODS****************************/
 
 double Dice::RollAllDices(vector<Dice> *dices) {
 	double totalSum = 0;
-
+	double totalMultiplier = 1.f;
 	//rolling dices
 	for (int i = 0; i < dices->size(); i++) {
-		dices->at(i).RollThisDice();
-		totalSum += dices->at(i).getThisMoney();
+		if (dices->at(i).mType == "Normal") {
+			dices->at(i).mRolledValue = rand() % 5 + 1;
+			totalSum += dices->at(i).mMultiplier*dices->at(i).mRolledValue;
+		}
+		else if (dices->at(i).mType == "Booster") {
+			dices->at(i).mRolledValue = rand() % dices->at(i).boosterMaxRollValue + 1;
+			totalMultiplier *= dices->at(i).mMultiplier*dices->at(i).mRolledValue;
+		}
 	}
 
 	//animating dices
@@ -25,7 +33,7 @@ double Dice::RollAllDices(vector<Dice> *dices) {
 		dicesWorker[i].join();
 	}
 
-	return totalSum;
+	return totalSum*totalMultiplier;
 }
 
 
@@ -126,19 +134,15 @@ void Dice::AnimateThisDice() {
 		elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - startTime);
 		//inserting rolled value
 		if (elapsedTime.count() > *mAnimationTime / 5*4) {
-			GraphicsLib::InsertLine(mY +offsetY, mX + offsetX-2, FormatNumber(getThisMoney()), col_noColor, col_yellow);
+			GraphicsLib::InsertLine(mY +offsetY, mX + offsetX-2, FormatNumber(mMultiplier*mRolledValue), col_noColor, col_yellow);
 		}
 	} while (elapsedTime.count() < *mAnimationTime);
 	
 	//inserting true value frame
 	GraphicsLib::InsertArray(mY, mX, mNormalGraphics[mRolledValue - 1]);
 }
-void Dice::RollThisDice() {
-	mRolledValue = rand() % 5 + 1;
-}
-double Dice::getThisMoney() {
-	return round(mMultiplier*mRolledValue);
-}
+
+
 
 Dice::Dice(string type, int y, int x, double multiplier, double *animationTime, char upgradeKey) {
 	mType = type;
@@ -147,6 +151,9 @@ Dice::Dice(string type, int y, int x, double multiplier, double *animationTime, 
 	mMultiplier = multiplier;
 	mAnimationTime = animationTime;
 	mUpgradeKey = upgradeKey;
+
+	if (mType == "Normal") normalDices++;
+	else if (mType == "Booster") boosterDices++;
 
 	InitializeGraphics();
 }

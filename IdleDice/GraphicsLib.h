@@ -13,6 +13,8 @@ private:
 	static bool mCommandInUse;
 	static bool mFrameRateOn;
 	static mutex mMutexCommand;
+	static int mYoffset, mXoffset;
+
 
 
 	static void HandleCommands();

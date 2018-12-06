@@ -2,6 +2,8 @@
 #include "InputLib.h"
 
 string InputLib::mPressedKey;
+mutex InputLib::mMutex;
+bool InputLib::mKeyRead = false;
 
 void InputLib::TestKeys() {
 	while (1) {
@@ -17,7 +19,11 @@ void InputLib::Test() {
 	}
 }
 bool InputLib::KeyPressed(string key) {
-	if (mPressedKey == key) return true;
+	lock_guard<mutex> lock(mMutex);
+	if (mPressedKey == key && !mKeyRead) {
+		mKeyRead = true; 
+		return true;
+	}
 	else return false;
 }
 void InputLib::GetInput() {
@@ -44,6 +50,8 @@ void InputLib::GetInput() {
 	int firstValue = _getch();
 	int secondValue = _getch();
 
+	//locking mutex AFTER reading keyboard input
+	lock_guard<mutex> lock(mMutex);
 	/*
 		Q: Why I sometimes call this method recursively?
 		A: To iterate this method until I get specified input without continuing any
@@ -52,7 +60,7 @@ void InputLib::GetInput() {
 		executed again in the next program loop. This is unwanted behaviour.
 	*/
 
-
+	int keySuccesfullyRead = true;
 	//Reading function keys
 	if (firstValue == KEY_FUNCTION) {
 
@@ -62,7 +70,7 @@ void InputLib::GetInput() {
 		case KEY_F6: mPressedKey = "F6"; break;
 		case KEY_F9: mPressedKey = "F9"; break;
 		case KEY_F10: mPressedKey = "F10"; break;
-		default: this->GetInput(); break;
+		default:keySuccesfullyRead = false;
 		}
 
 	}
@@ -74,7 +82,7 @@ void InputLib::GetInput() {
 		case KEY_LEFT: mPressedKey = "Left"; break;
 		case KEY_RIGHT: mPressedKey = "Right"; break;
 		case KEY_DOWN: mPressedKey = "Down"; break;
-		default: this->GetInput(); break;
+		default:keySuccesfullyRead = false;
 		}
 
 	}
@@ -93,5 +101,8 @@ void InputLib::GetInput() {
 	else if (firstValue == '7') { mPressedKey = "7"; }
 	else if (firstValue == '8') { mPressedKey = "8"; }
 	else if (firstValue == '9') { mPressedKey = "9"; }
-	else { this->GetInput(); }
+	else keySuccesfullyRead = false;
+
+	if (keySuccesfullyRead)
+		mKeyRead = false;
 }

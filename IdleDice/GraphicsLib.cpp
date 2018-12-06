@@ -10,6 +10,9 @@ int GraphicsLib::mWidth = 0;
 bool GraphicsLib::mCommandInUse = false;
 bool GraphicsLib::mFrameRateOn = true;
 mutex GraphicsLib::mMutexCommand;
+int GraphicsLib::mYoffset = 10;
+int GraphicsLib::mXoffset = 15;
+
 /*********************WORKING ON*********************/
 
 
@@ -178,9 +181,9 @@ void GraphicsLib::HandleClearScreen() {
 }
 void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>> arr) {
 	//display given array on screen
-	for (int i = y; i < y + arr.size(); i++) {
-		for (int j = x; j < x + arr.at(0).size(); j++) {
-			HandlePixel(i, j, arr.at(i-y)[j-x].symb, arr[i-y][j-x].bgCol, arr[i-y][j-x].fgCol);
+	for (int i = 0; i < arr.size(); i++) {
+		for (int j = 0; j < arr.at(i).size(); j++) {
+			HandlePixel(i+y, j+x, arr.at(i)[j].symb, arr[i][j].bgCol, arr[i][j].fgCol);
 		}
 	}
 }
@@ -237,8 +240,8 @@ void GraphicsLib::DrawPixel(int y, int x, Pixel * pixel) {
 
 	//Goto 
 	COORD coord;
-	coord.Y = y;
-	coord.X = x;
+	coord.Y = y+mYoffset;
+	coord.X = x+mXoffset;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
 	//Set color

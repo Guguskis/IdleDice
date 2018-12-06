@@ -6,8 +6,10 @@ class InputLib
 {
 private:
 	static string mPressedKey;
+	static mutex mMutex;
+	static bool mKeyRead;
 public:
-	void GetInput();
+	static void GetInput();
 	static bool KeyPressed(string);
 	void Test();
 	void TestKeys();
