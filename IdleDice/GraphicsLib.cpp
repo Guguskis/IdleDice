@@ -180,7 +180,7 @@ void GraphicsLib::HandleArray(int y, int x, const vector<vector<Pixel>> arr) {
 	//display given array on screen
 	for (int i = y; i < y + arr.size(); i++) {
 		for (int j = x; j < x + arr.at(0).size(); j++) {
-			HandlePixel(i, j, arr.at(i)[j].symb, arr.at(i)[j].bgCol, arr.at(i)[j].fgCol);
+			HandlePixel(i, j, arr.at(i-y)[j-x].symb, arr[i-y][j-x].bgCol, arr[i-y][j-x].fgCol);
 		}
 	}
 }
@@ -267,13 +267,19 @@ bool GraphicsLib::NeedUpdatePixel(const Pixel * cpx, const Pixel * lpx) {
 }
 
 void GraphicsLib::SetData(int height, int width) {
+	//creating pixel container with custom values
+	Pixel pixel;
+	pixel.symb = ' ';
+	pixel.bgCol = col_black;
+	pixel.fgCol = col_black;
 	//creating line container
-	vector<Pixel> line(width);
+	vector<Pixel> line(width, pixel);
 	//creating grid container
 	vector<vector<Pixel>> screen(height, line);
 	//setting data
 	delete GraphicsLib::mCurrFrame;
 	delete GraphicsLib::mLastFrame;
+	
 	mCurrFrame = new vector<vector<Pixel>>(screen);
 	mLastFrame = new vector<vector<Pixel>>(screen);
 
