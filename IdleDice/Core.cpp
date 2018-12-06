@@ -2,37 +2,66 @@
 #include "Core.h"
 
 
+/*********************WORKING ON*********************/
 
 void Core::HandleInput() {
-	InputLib input;
-	/*
+
 	while (mGameIsRunning) {
-		input.GetInput();
+		InputLib::GetInput();
 
-		if (input.KeyPressed("Esc")) mGameIsRunning=false;
-		else if (input.KeyPressed("0")) InsertTextBox(0, 0, string(25, ' '), 1, 25, col_red, col_red);
-		else if (input.KeyPressed("1")) InsertTextBox(1, 0, string(25, ' '), 1, 25, col_red, col_red);
-		else if (input.KeyPressed("2")) InsertTextBox(2, 0, string(25, ' '), 1, 25, col_red, col_red);
-		else if (input.KeyPressed("3")) InsertTextBox(3, 0, string(25, ' '), 1, 25, col_red, col_red);
-		else if (input.KeyPressed("4")) InsertTextBox(4, 0, string(25, ' '), 1, 25, col_red, col_red);
-
-	}*/
+		if (InputLib::KeyPressed("Esc")) mGameIsRunning=false;
+		else if (InputLib::KeyPressed("1")) InsertLine(0, 0, string(25, '1'), col_red, col_red);
+		else if (InputLib::KeyPressed("2")) InsertLine(1, 0, string(25, '2'), col_red, col_red);
+		else if (InputLib::KeyPressed("3")) InsertLine(2, 0, string(25, '3'), col_red, col_red);
+		else if (InputLib::KeyPressed("4")) InsertLine(3, 0, string(25, '4'), col_red, col_red);
+		else if (InputLib::KeyPressed("5")) InsertLine(4, 0, string(25, '1'), col_red, col_red);
+		else if (InputLib::KeyPressed("Space")) InsertClearScreen();
+	}
 }
 
+
+
+void Core::Run(){
+	HandleInput();
+}
+
+
+
+/*********************FINISHED*********************/
 void Core::Test() {
 	//This method contains children class Test methods to make it easier to debug
 
-	
+	vector<Dice> dices;
+
+	for (int i = 0; i < 8; i++) {
+		Dice dice("Normal", 5, 5+15*i, 1.f, &mAnimationTime, '1'+i);
+		dices.push_back(dice);
+	}
+	while (mGameIsRunning) {
+		Dice::RollAllDices(&dices);
+		
+		mAnimationTime *= .9f;
+		InputLib::GetInput();
+
+		if (InputLib::KeyPressed("Esc")) mGameIsRunning = false;
+	}
+
 }
 
+Core::Core() {
+	//initialize random seed
+	srand(time(NULL));
+	//set graphics handler data
+	GraphicsLib::SetData(mHeight, mWidth);
+	//start graphics handler
+	thread graphicsWorker(&GraphicsLib::HandleGraphics, &mFPS, &mGameIsRunning);
+	graphicsWorker.detach();
+}
 void Core::Demo(){
 	//demonstration of how to use graphics and input libraries and what they can do
-	//thread inputWorker(&Core::HandleInput, this);
 	
-	thread graphicsWorker(&GraphicsLib::HandleGraphics, &mFPS, &mGameIsRunning);
-	InputLib input;
+	
 	int money = 0;
-
 
 	vector<vector<Pixel>> arr(mHeight, vector<Pixel>(mWidth));
 	int y = 0, x = 0;
@@ -69,7 +98,7 @@ void Core::Demo(){
 
 		InsertArray(0, 0, arr);
 
-		input.GetInput();
+		InputLib::GetInput();
 
 		if (InputLib::KeyPressed("Left"))	x = (x - 1) % mWidth;
 		else if (InputLib::KeyPressed("Right"))	x = (x + 1) % mWidth;
@@ -82,14 +111,4 @@ void Core::Demo(){
 	}
 
 	spawnSymbolWorker.join();
-	graphicsWorker.join();
-	//inputWorker.join();
-}
-
-
-
-
-Core::Core() {
-	GraphicsLib::SetData(mHeight, mWidth);
-	srand(time(NULL));
 }

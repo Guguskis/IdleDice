@@ -30,7 +30,7 @@ struct Pixel {
 		symb - displayed symbol
 		bgCol, fgCol - background and symbol colors respectively
 	*/
-	char symb=symb_noSymbol;
+	char symb = symb_noSymbol;
 	int bgCol = col_noColor, fgCol = col_noColor;
 
 };
@@ -42,4 +42,6 @@ struct Command {
 	string text;
 	vector<vector<Pixel>> arr;
 };
+
+
 #endif
