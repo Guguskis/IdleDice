@@ -9,7 +9,6 @@ using namespace std;
 
 	To do:
 		game
-			minigame2
 			minigame3
 			minigame4
 		nicer 
@@ -19,7 +18,8 @@ using namespace std;
 		graphics library
 		FPS counter
 		improve stability for graphics library (added mutex for multithreading)
-		added minigame 1
+		minigame1
+		minigame2
 */
 
 

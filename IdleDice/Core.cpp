@@ -13,8 +13,11 @@ void Core::Run() {
 	};
 	thread workerInput(runInput, &mGameIsRunning);
 	thread workerMinigame1(&Core::Minigame1, this, 0, 0, &mGameIsRunning);
+	thread workerMinigame2(&Core::Minigame2, this, 0, 8, &mGameIsRunning);
+
 	workerInput.join();
 	workerMinigame1.join();
+	workerMinigame2.join();
 }
 
 /*********************FINISHED*********************/
@@ -42,6 +45,7 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 
 	int height = 12, width = 6;
 	int carX=2;
+	vector<vector<Pixel>> game(height, vector<Pixel>(width));
 
 	//Draw frame around minigame window
 	for (int i = 0; i < height+2; i++) {
@@ -53,12 +57,12 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 	}
 
 	//Main minigame logic
-	auto gameLoop = [](mutex *minigameMutex, vector<vector<Pixel>> *game, bool *minigameIsRunning, int *y, int *x, int *carX) {
+	auto gameLoop = [&gameIsRunning](mutex *minigameMutex, vector<vector<Pixel>> *game, bool *minigameIsRunning, int *y, int *x, int *carX) {
 		double tickTime = 600.f;
 		double gameSpeed = 0.99f;
-		int obstacle1Chance = 30;
-		int obstacle2Chance = 5;
-		while (*minigameIsRunning) {
+		int obstacle1Chance = 25;
+		int obstacle2Chance = 3;
+		while (*minigameIsRunning && *gameIsRunning) {
 			minigameMutex->lock();
 			//minigame logic
 			for (int i = game->size() - 1; i >= 0; i--) {
@@ -92,8 +96,11 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 			}
 
 			//checking for collision
-			if (game->at(game->size() - 1)[*carX].symb == 'H') 
+			if (game->at(game->size() - 1)[*carX].symb == 'H') {
 				*minigameIsRunning = false;
+				game->at(game->size() - 1)[*carX].fgCol = col_yellow;
+				game->at(game->size() - 1)[*carX].bgCol = col_darkYellow;
+			}
 
 			//generating obstacles
 			bool addObstacle1 = false;
@@ -121,15 +128,19 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 
 	};
 
-	vector<vector<Pixel>> game(height, vector<Pixel>(width));
 
 	thread minigame(gameLoop, &minigameMutex, &game, &minigameIsRunning, &y, &x, &carX);
 
-	while (minigameIsRunning) {
+	//controlling car
+	while (minigameIsRunning && *gameIsRunning) {
 		if (KeyPressed("Left") && carX>0) {
 			minigameMutex.lock();
 			//check for collision
-			if (game[game.size()-1][carX - 1].symb == 'H') minigameIsRunning = false;
+			if (game[game.size() - 1][carX - 1].symb == 'H') {
+				minigameIsRunning = false;
+				game[game.size() - 1][carX].fgCol = col_yellow;
+				game[game.size() - 1][carX].bgCol = col_darkYellow;
+			}
 			//move car
 			else swap(game[game.size()-1][carX-1], game[game.size()-1][carX]);
 			carX--;
@@ -141,7 +152,11 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 		if (KeyPressed("Right") && carX < width - 1) {
 			minigameMutex.lock();
 			//check for collision
-			if (game[game.size() - 1][carX + 1].symb == 'H') minigameIsRunning = false;
+			if (game[game.size() - 1][carX + 1].symb == 'H') {
+				minigameIsRunning = false;
+				game[game.size() - 1][carX].fgCol = col_yellow;
+				game[game.size() - 1][carX].bgCol = col_darkYellow;
+			}
 			//move car
 			else swap(game[game.size() - 1][carX + 1], game[game.size() - 1][carX]);
 			carX++;
@@ -161,14 +176,153 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 }
 
 void Core::Minigame2(int y, int x, bool *gameIsRunning){
-	int height = 5, width = 10;
-	
+	mutex minigameMutex;
+	bool minigameIsRunning = true;
 
-	while (*gameIsRunning) {
-		if (KeyPressed("Right")) cout << "Right" << endl;
-		else if (KeyPressed("Esc")) *gameIsRunning = false;
+	int height = 3, width = 25;
+	int lives = 5;
+	int greenLines = 3;
+
+	Pixel pixel;
+	pixel.fgCol = col_white;
+	pixel.symb = ' ';
+
+	vector<vector<Pixel>> game(height, vector<Pixel>(width, pixel));
+
+	//Draw frame around minigame window
+	for (int i = 0; i < height + 2; i++) {
+		for (int j = 0; j < width + 2; j++) {
+			if (i == 0 || j == 0 || i == height + 1 || j == width + 1) {
+				InsertPixel(i+y, j+x, ' ', col_yellow, col_red);
+			}
+		}
+	}
+
+	
+	auto gameLoop = [&gameIsRunning, &greenLines](mutex *minigameMutex, vector<vector<Pixel>> *game, bool *minigameIsRunning, int *y, int *x, int *lives) {
+		double tickTime = 300.f;
+		double gameSpeed = 0.99f;
+		int noteChance = 4;
+		int maxLives = *lives;
+
+		//drawing green lines and changing foreground color
+		for (int i = 0; i < game->size(); i++) {
+			for (int j = 0; j < greenLines; j++) {
+				game->at(i)[j+1].bgCol = col_green;
+			}
+			game->at(i)[0].fgCol = col_pink;
+			game->at(i)[1].fgCol = col_red;
+			game->at(i)[2].fgCol = col_yellow;
+		}
+
+		int ticksPassed = 0;
+		while (*gameIsRunning && *minigameIsRunning) {
+			minigameMutex->lock();
+			//minigame logic
+			for (int i = 0; i < game->size(); i++) {
+				for (int j = 0; j < game->at(i).size(); j++) {
+
+					//checking first column
+					if (j == 0) {
+						if (game->at(i)[0].symb !=' ') {
+							game->at(i)[j].symb = ' ';
+							*lives = *lives - 1;
+						}
+					}
+					//shifting everything to the left
+					else {
+						if (game->at(i)[j].symb != ' ') {
+							game->at(i)[j - 1].symb = game->at(i)[j].symb;
+							game->at(i)[j].symb = ' ';
+						}
+					}
+				}
+			}
+			
+			//generating notes
+			bool addNote = false;
+			if (ticksPassed % noteChance == 0) addNote = true;
+
+			if (addNote) {
+				int noteY = rand() % game->size();
+				game->at(noteY)[game->at(0).size() - 1].symb = '1' + noteY;
+				game->at(noteY)[game->at(0).size() - 1].fgCol = col_white;
+				
+			}
+
+			InsertArray(*y + 1, *x + 1, *game);
+
+			//draw live counter
+			string text = "Lives ";
+			InsertLine(*y, *x, text, col_noColor, col_grey);
+
+			for (int i = 1; i <= maxLives; i++) {
+				if (i <= *lives) InsertPixel(*y, *x + i - 1 + text.length(), 'V', col_noColor, col_darkRed);
+				else InsertPixel(*y, *x + i - 1+text.length(), ' ', col_noColor, col_red);
+			}
+
+			if (*lives <= 0) 
+				*minigameIsRunning = false;
+
+			minigameMutex->unlock();
+			
+			//controlling game speed
+			Sleep(max((int)tickTime, 150));
+			tickTime *= gameSpeed;
+			ticksPassed++;
+		}
+	};
+	
+	
+	thread minigame(gameLoop, &minigameMutex, &game, &minigameIsRunning, &y, &x, &lives);
+
+	//controlling minigame
+	while (minigameIsRunning && *gameIsRunning) {
+		bool keyWasPressed = false;
+		bool noteHit = false;
+		int noteX=0, noteY=0;
+
+		//checking all pressed keys
+		for (int i = 0; i < height; i++) {
+			string key = "0";
+			key[0] += i+1;
+			//if key was pressed, record note coordinates
+			if (KeyPressed(key)) {
+				keyWasPressed = true;
+
+				minigameMutex.lock();
+				for (int j = 1; j <=greenLines  && !noteHit; j++) {
+					if (game[i][j].symb != ' ') {
+						game[i][j].symb = ' ';
+						noteHit = true;
+						noteY = i;
+						noteX = j;
+					}
+				}
+				minigameMutex.unlock();
+			}
+		}
+
+		//handle input
+		if (keyWasPressed) {
+			minigameMutex.lock();
+
+			if (!noteHit) lives--;
+			else {
+				InsertArray(y + 1, x + 1, game);
+				InsertPixel(y + noteY + 1, x + noteX + 1, ' ', col_darkGreen, col_grey);
+			}
+			minigameMutex.unlock();
+		}
 		Sleep(1);
 	}
+
+	minigame.join();
+
+	/*Insert game over animation here*/
+
+
+	mGameIsRunning = false;
 }
 
 void Core::SetConsole() {
