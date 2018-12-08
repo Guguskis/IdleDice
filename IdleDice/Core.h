@@ -19,8 +19,10 @@ private:
 
 private:
 	void SetConsole();
+	void GameOverAnimation(int, int, int, int, int, int);
 	void Minigame1(int, int, bool*);
 	void Minigame2(int, int, bool*);
+	void Minigame3(int, int, bool*);
 
 
 public:

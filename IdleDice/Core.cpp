@@ -14,10 +14,12 @@ void Core::Run() {
 	thread workerInput(runInput, &mGameIsRunning);
 	thread workerMinigame1(&Core::Minigame1, this, 0, 0, &mGameIsRunning);
 	thread workerMinigame2(&Core::Minigame2, this, 0, 8, &mGameIsRunning);
+	thread workerMinigame3(&Core::Minigame3, this, 5, 8, &mGameIsRunning);
 
 	workerInput.join();
 	workerMinigame1.join();
 	workerMinigame2.join();
+	workerMinigame3.join();
 }
 
 /*********************FINISHED*********************/
@@ -51,7 +53,7 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 	for (int i = 0; i < height+2; i++) {
 		for (int j = 0; j < width+2; j++) {
 			if (i == 0 || i == height + 1 || j == 0 || j == width + 1) {
-				InsertPixel(i, j, ' ', col_cyan, col_noColor);
+				InsertPixel(i+y, j+x, ' ', col_cyan, col_noColor);
 			}
 		}
 	}
@@ -121,7 +123,7 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 
 			minigameMutex->unlock();
 
-			//controlling game speed
+			//controlling game speed	
 			Sleep(max((int)tickTime, 100));
 			tickTime *= gameSpeed;
 		}
@@ -169,6 +171,8 @@ void Core::Minigame1(int y, int x, bool *gameIsRunning) {
 	}
 	minigame.join();
 
+	//GameOverAnimation(y+1, x+1, y + height, x + carX+1, height, width);
+
 	/*
 		PLACE MINIGAME LOSE ANIMATION HERE
 	*/
@@ -202,7 +206,7 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 	auto gameLoop = [&gameIsRunning, &greenLines](mutex *minigameMutex, vector<vector<Pixel>> *game, bool *minigameIsRunning, int *y, int *x, int *lives) {
 		double tickTime = 300.f;
 		double gameSpeed = 0.99f;
-		int noteChance = 4;
+		int noteRarity = 8;
 		int maxLives = *lives;
 
 		//drawing green lines and changing foreground color
@@ -241,7 +245,7 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 			
 			//generating notes
 			bool addNote = false;
-			if (ticksPassed % noteChance == 0) addNote = true;
+			if (ticksPassed % noteRarity == 0) addNote = true;
 
 			if (addNote) {
 				int noteY = rand() % game->size();
@@ -278,7 +282,7 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 
 	//controlling minigame
 	while (minigameIsRunning && *gameIsRunning) {
-		bool keyWasPressed = false;
+		int keyPressed = -1;
 		bool noteHit = false;
 		int noteX=0, noteY=0;
 
@@ -288,7 +292,7 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 			key[0] += i+1;
 			//if key was pressed, record note coordinates
 			if (KeyPressed(key)) {
-				keyWasPressed = true;
+				keyPressed = i;
 
 				minigameMutex.lock();
 				for (int j = 1; j <=greenLines  && !noteHit; j++) {
@@ -304,10 +308,13 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 		}
 
 		//handle input
-		if (keyWasPressed) {
+		if (keyPressed!=-1) {
 			minigameMutex.lock();
 
-			if (!noteHit) lives--;
+			if (!noteHit) {
+				lives--;
+				InsertLine(y + 1 + keyPressed, x + 2, string(greenLines, ' '), col_red, col_noColor);
+			}
 			else {
 				InsertArray(y + 1, x + 1, game);
 				InsertPixel(y + noteY + 1, x + noteX + 1, ' ', col_darkGreen, col_grey);
@@ -321,8 +328,169 @@ void Core::Minigame2(int y, int x, bool *gameIsRunning){
 
 	/*Insert game over animation here*/
 
-
 	mGameIsRunning = false;
+}
+
+void Core::Minigame3(int y, int x, bool *gameIsRunning) {
+	mutex minigameMutex;
+	bool minigameIsRunning = true;
+
+	int height =11, width = 25;
+	bool laserOn = true;
+	int lives = 4    * 2;
+	char goodObject = 'Y'; // must burn
+	char badObject = 'X'; // must let fall down
+	int laserCol = col_red;
+
+	Pixel pixel;
+	pixel.symb = ' ';
+
+	vector<vector<Pixel>> game(height, vector< Pixel>(width, pixel));
+
+	//Draw frame around minigame window
+	for (int i = 0; i < height + 2; i++) {
+		for (int j = 0; j < width + 2; j++) {
+			if (i == 0 || i == height + 1 || j == 0 || j == width + 1) {
+				InsertPixel(i+y, j+x, ' ', col_darkPink, col_noColor);
+			}
+		}
+	}
+
+	auto gameLoop = [&gameIsRunning, &goodObject, &badObject, &laserCol](mutex *minigameMutex, vector<vector<Pixel>> *game, int *lives, bool *minigameIsRunning, int *y, int *x, bool *laserOn, int height, int width) {
+		double tickTime = 300.f;
+		double gameSpeed = 0.97f;
+		int obstacleRarity = 12;
+		int minTickTime = 75;
+
+		//drawing laser for first time
+		if (*laserOn) {
+			for (int i = 0; i < width; i++) {
+				game->at(height - 2)[i].symb = ' ';
+				game->at(height - 2)[i].bgCol = laserCol;
+			}
+		}
+
+		int ticksPassed = 0;
+
+		while (*gameIsRunning && *minigameIsRunning) {
+
+			int goodCol = col_red;
+			int badCol = col_green;
+			minigameMutex->lock();
+
+			//moving objects down by one
+			for (int i = height - 1; i >= 0; i--) {
+				for (int j = 0; j < width; j++) {
+					//removing last line and applying damage
+					if (i == height - 1 && game->at(i)[j].symb != ' ') {
+						//aplying damage
+						if (game->at(i)[j].symb == goodObject)
+							*lives = *lives-1;
+
+						//removing
+						game->at(i)[j].symb = ' ';
+						game->at(i)[j].bgCol = col_black;
+					}
+					else {
+						//transfering objects down by one line
+						if (game->at(i)[j].symb != ' ') {
+							game->at(i+1)[j].symb = game->at(i)[j].symb;
+							game->at(i+1)[j].bgCol = game->at(i)[j].bgCol;
+							game->at(i)[j].symb = ' ';
+							game->at(i)[j].bgCol = col_black;
+							//applying laser color
+							if (i == height - 2 && *laserOn) {
+								game->at(i)[j].bgCol = laserCol;
+							}
+							
+						}
+					}
+				}
+			}
+
+			//handling laser burning
+			if (*laserOn) {
+				for (int i = 0; i < width; i++) {
+					if (game->at(height-2)[i].symb == badObject)
+						*lives = *lives - 2;
+					game->at(height-2)[i].symb = ' ';
+					game->at(height-2)[i].bgCol = laserCol;
+				}
+			}
+	
+			//generating objects;
+			if (ticksPassed%obstacleRarity == 0) {
+				Pixel object;
+				if (rand() % 2 == 0) {
+					object.symb = badObject;
+					object.bgCol = badCol;
+				}
+				else {
+					object.symb = goodObject;
+					object.bgCol= goodCol;
+				}
+				game->at(0)[rand() % width] = object;
+			}
+			InsertArray(*y + 1, *x + 1, *game);
+
+			//inserting lives info
+			string text = "Lives ";
+			if (*lives > 0) {
+				text += string((*lives) / 2, 'V');
+				text += string((*lives) % 2, '\\');
+			}
+			InsertLine(*y, *x, text+"  ", col_noColor, col_cyan);
+
+			if (*lives <= 0)
+				*minigameIsRunning = false;
+
+			minigameMutex->unlock();
+
+			if(ticksPassed%obstacleRarity==0)
+				tickTime *= gameSpeed;
+
+			Sleep(max((int)tickTime, minTickTime));
+			ticksPassed++;
+		}
+
+		
+	};
+
+	thread minigame(gameLoop, &minigameMutex, &game, &lives, &minigameIsRunning, &y, &x, &laserOn, height, width);
+	
+	while (minigameIsRunning && *gameIsRunning) {
+		if (KeyPressed("Space")) {
+			minigameMutex.lock();
+			laserOn = !laserOn;
+			for (int j = 0; j < width; j++) {
+				if (laserOn) {
+					//burning correct object
+					if (game[height - 2][j].symb == badObject) {
+						lives = lives - 1;
+					}
+					game[height - 2][j].symb = ' ';
+					game[height - 2][j].bgCol = laserCol;
+
+				}
+				else {
+					if (game[height - 2][j].symb == ' ')
+						game[height - 2][j].bgCol = col_black;
+				}
+			}
+			
+			InsertArray(y + 1, x + 1, game);
+
+			if (lives <= 0)
+				minigameIsRunning = false;
+			minigameMutex.unlock();
+		}
+		Sleep(1);
+	}
+
+
+	minigame.join();
+
+	*gameIsRunning = false;
 }
 
 void Core::SetConsole() {
@@ -334,6 +502,24 @@ void Core::SetConsole() {
 	cursorInfo.bVisible = false; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
 	
+}
+void Core::GameOverAnimation(int y, int x, int endY, int endX, int height, int width) {
+
+	int radius = max(height, width);
+
+	vector<vector<Pixel>> screen(height, vector<Pixel>(width, Pixel()));
+
+	for (int k = 0; k < radius; k++) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				//x^2+y^2=z^2
+			}
+		}
+	}
+
+	
+	
+	cin >> radius;
 }
 Core::Core() {
 	//set up console
