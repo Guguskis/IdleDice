@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "MinigameEngine.h"
 
+
 class MinigameCars:
 	private MinigameEngine
 {
@@ -15,7 +16,6 @@ private:
 
 public:
 
-	void Test();
 	void Run();
 	MinigameCars(int, int, int, int, int, double, double, bool *);
 	MinigameCars();

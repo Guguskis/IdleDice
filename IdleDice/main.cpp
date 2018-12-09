@@ -8,10 +8,8 @@ using namespace std;
 
 
 	To do:
-		game
-			minigame3
-			minigame4
-		nicer 
+		Quick minigame guide
+		start menu
 
 	Finished:
 		input library
@@ -20,13 +18,15 @@ using namespace std;
 		improve stability for graphics library (added mutex for multithreading)
 		minigame1
 		minigame2
+		minigame3
+		game
 */
 
 
 int main() {
 
 	Core core;
-	//core.Test();
+
 	core.Run();
-	
+	//core.Test();
 }

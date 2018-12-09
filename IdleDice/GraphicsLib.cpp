@@ -10,8 +10,8 @@ int GraphicsLib::mWidth = 0;
 bool GraphicsLib::mCommandInUse = false;
 bool GraphicsLib::mFrameRateOn = true;
 mutex GraphicsLib::mMutexCommand;
-int GraphicsLib::mYoffset = 10;
-int GraphicsLib::mXoffset = 15;
+int GraphicsLib::mYoffset = 0;
+int GraphicsLib::mXoffset = 0;
 
 /*********************WORKING ON*********************/
 

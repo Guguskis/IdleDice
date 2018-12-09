@@ -15,7 +15,7 @@
     <Filter Include="Precompiled Header">
       <UniqueIdentifier>{568ce717-c040-48ae-a84d-4c23eaf7cf7e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects">
+    <Filter Include="Minigames">
       <UniqueIdentifier>{e3f29d62-59aa-4570-ac48-0f77d82d9af2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -38,8 +38,17 @@
     <ClCompile Include="Logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Dice.cpp">
-      <Filter>Objects</Filter>
+    <ClCompile Include="MinigameEngine.cpp">
+      <Filter>Minigames</Filter>
+    </ClCompile>
+    <ClCompile Include="MinigameCars.cpp">
+      <Filter>Minigames</Filter>
+    </ClCompile>
+    <ClCompile Include="MinigamePianoTiles.cpp">
+      <Filter>Minigames</Filter>
+    </ClCompile>
+    <ClCompile Include="MinigameLaser.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,8 +70,17 @@
     <ClInclude Include="Logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dice.h">
-      <Filter>Objects</Filter>
+    <ClInclude Include="MinigameEngine.h">
+      <Filter>Minigames</Filter>
+    </ClInclude>
+    <ClInclude Include="MinigameCars.h">
+      <Filter>Minigames</Filter>
+    </ClInclude>
+    <ClInclude Include="MinigamePianoTiles.h">
+      <Filter>Minigames</Filter>
+    </ClInclude>
+    <ClInclude Include="MinigameLaser.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

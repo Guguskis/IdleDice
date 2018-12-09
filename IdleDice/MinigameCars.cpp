@@ -131,7 +131,9 @@ void MinigameCars::GameLogic() {
 			mGame[effHeight - 1][carX].bgCol = col_darkYellow;
 		}
 
+		//change this with UpdateGraphics();
 		InsertArray(mY + 1, mX + 1, mGame);
+
 		mMutex.unlock();
 
 		Sleep(max(mTickTime, minTickTime));
@@ -139,9 +141,6 @@ void MinigameCars::GameLogic() {
 	}
 }
 
-void MinigameCars::Test() {
-	
-}
 
 void MinigameCars::Run() {
 	thread inputWorker(&MinigameCars::GameControl, this);
@@ -152,13 +151,6 @@ void MinigameCars::Run() {
 
 	*mGameEngineIsRunning = false;
 }
-
-
-
-
-
-
-
 
 
 

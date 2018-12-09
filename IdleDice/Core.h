@@ -2,7 +2,10 @@
 #include "pch.h"
 #include "GraphicsLib.h"
 #include "InputLib.h"
-#include "Dice.h"
+
+#include "MinigameCars.h"
+#include "MinigamePianoTiles.h"
+#include "MinigameLaser.h"
 
 class Core:
 	private GraphicsLib,
@@ -10,18 +13,16 @@ class Core:
 	private Logging
 {
 private:
-	int mHeight = 30, mWidth = 90;
+	int mHeight = 30, mWidth = 60;
 	int mFPS = 60;
 
-	double mAnimationTime = 1200.f;
+
 	bool mGameIsRunning = true;
-	vector<string> maptest;
+
 
 private:
 	void SetConsole();
 	void GameOverAnimation(int, int, int, int, int, int);
-	void Minigame1(int, int, bool*);
-	void Minigame2(int, int, bool*);
 	void Minigame3(int, int, bool*);
 
 
