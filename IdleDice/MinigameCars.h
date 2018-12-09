@@ -1,0 +1,24 @@
+#pragma once
+#include "pch.h"
+#include "MinigameEngine.h"
+
+class MinigameCars:
+	private MinigameEngine
+{
+private:
+	int carX=0;
+	int obstacleFrequency = 4;
+	int extraObstacleChance = 15;
+
+	void GameControl();
+	void GameLogic();
+
+public:
+
+	void Test();
+	void Run();
+	MinigameCars(int, int, int, int, int, double, double, bool *);
+	MinigameCars();
+	~MinigameCars();
+};
+
