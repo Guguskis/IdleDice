@@ -4,7 +4,7 @@
 
 /*********************WORKING ON*********************/
 
-void Core::Run() {
+void Core::RunGameCore() {
 	auto runInput = [](bool* mGameIsRunning) {
 		while (*mGameIsRunning) {
 			GetInput();
@@ -13,9 +13,9 @@ void Core::Run() {
 	};
 	thread workerInput(runInput, &mGameIsRunning);
 
-	MinigameCars cars(0, 0, 20, 10, col_green, 600.f, 0.98f, &mGameIsRunning);
-	MinigamePianoTiles pianoTiles(0, 10, 6, 30, col_cyan, 600.f, 0.98f, &mGameIsRunning);
-	MinigameLaser laser(6, 10, 14, 30, col_red, 600.f, 0.98f, &mGameIsRunning);
+	MinigameCars cars(0, 0, 20, 10, col_green, 400.f, 0.98f, &mGameIsRunning);
+	MinigamePianoTiles pianoTiles(0, 10, 6, 30, col_cyan, 400.f, 0.97f, &mGameIsRunning);
+	MinigameLaser laser(6, 10, 14, 30, col_yellow, 400.f, 0.98f, &mGameIsRunning);
 
 	thread carsWorker(&MinigameCars::Run, &cars);
 	thread pianoTilesWorker(&MinigamePianoTiles::Run, &pianoTiles);
@@ -28,10 +28,139 @@ void Core::Run() {
 
 }
 
+void Core::StartMenu(){
+
+}
 /*********************FINISHED*********************/
 void Core::Test(){
+	auto runInput = [](bool* mGameIsRunning) {
+		while (*mGameIsRunning) {
+			GetInput();
+			if (KeyPressed("Esc")) *mGameIsRunning = false;
+		}
+	};
+	thread workerInput(runInput, &mGameIsRunning);
+	/*********************************/
+	//InsertScore(50);
+
 	
+	MinigameCars cars(0, 0, 20, 10, col_green, 600.f, 0.98f, &mGameIsRunning);
+	thread carsWorker(&MinigameCars::Run, &cars);
+	carsWorker.join();
+	
+
+	
+
+
+
+	/*********************************/
+	workerInput.join();
 }
+
+
+
+void Core::InsertScore(int score){
+	vector<string> names = { "Fred", "Paul", "Stan Lee", "Gaben", "Tony", "Princess", "10?", "DISQUALIFIED", "Jake", "Esmeralda", "UNO", "To Isengard", "Nope", "k." };
+	
+	string name = names[rand()%names.size()];
+
+	string gzMsg = "Congratulations, " + name + " your score is " + to_string(score);
+
+	int boxHeight = 6;
+	int boxWidth = gzMsg.length()+4;
+	int boxY = (mHeight - boxHeight) / 2;
+	int boxX = (mWidth - boxWidth) / 2;
+
+
+	int originCol = col_blue;
+	int shiningCol = col_darkBlue;
+	//Displaying message
+	InsertTextBox(boxY, boxX, "", boxHeight, boxWidth, col_red, col_red);
+	InsertTextBox(boxY+1, boxX+1, "", boxHeight-2, boxWidth-2, col_black, col_black);
+
+	InsertTextBox(boxY+boxHeight/2-1, boxX + 2, gzMsg, boxHeight-2, gzMsg.length(), col_noColor, originCol);
+
+	//Shining text
+	bool isRunning = true;
+	auto textShine = [boxX, boxY, boxHeight, boxWidth, &isRunning, gzMsg, originCol, shiningCol]() {
+		while (isRunning) {
+			for (int i = 0; i < gzMsg.length()+1; i++) {
+				if(i<gzMsg.length())
+					InsertPixel(boxY + boxHeight / 2 - 1, boxX + 2 + i, symb_noSymbol, col_noColor, shiningCol);
+				if (i >= 1)
+					InsertPixel(boxY + boxHeight / 2 - 1, boxX + 2 + i-1, symb_noSymbol, col_noColor, originCol);
+				
+				if(isRunning)
+					Sleep(40);
+			}
+
+			//waiting 1400ms, splitted in chuncks for faster respond
+			auto start = chrono::steady_clock::now();
+			auto end = chrono::steady_clock::now();
+			auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start);
+			while (elapsed.count() < 1400) {
+				Sleep(40);
+				end = chrono::steady_clock::now();
+				elapsed = chrono::duration_cast<chrono::milliseconds>(end - start);
+			}
+		}
+
+	};
+
+	thread shiningWorker(textShine);
+
+	while (isRunning) {
+		if (KeyPressed("Space"))
+			isRunning = false;
+		if (isRunning)
+			Sleep(40);
+
+	}
+
+
+	shiningWorker.join();
+
+
+	//Inserting score
+	mScores.push_back(make_pair(name, score));
+	auto sortBySecond = [](pair<string, int> &a, pair<string, int> &b) {
+		return (a.second > b.second);
+	};
+	sort(mScores.begin(), mScores.end(), sortBySecond);
+
+}
+void Core::WriteScore(){
+	ofstream os("Scores.txt");
+	
+	for (int i = 0; i < mScores.size(); i++) {
+		os << mScores[i].first << " " << mScores[i].second << endl;
+	}
+
+	os.close();
+
+}
+void Core::LoadScore(){
+	ifstream is("Scores.txt");
+
+	if (!is.good()) return;
+
+	mScores.clear();
+	while (!is.eof()) {
+		string name;
+		int score;
+		is >> name >> score;
+		mScores.push_back(make_pair(name, score));
+	}
+
+	auto sortBySecond = [](pair<string, int> &a, pair<string, int> &b) {
+		return (a.second > b.second); 
+	};
+	sort(mScores.begin(), mScores.end(), sortBySecond);
+
+
+	is.close();
+}
+
 void Core::SetConsole() {
 	//Hiding cursor
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -42,34 +171,20 @@ void Core::SetConsole() {
 	SetConsoleCursorInfo(out, &cursorInfo);
 	
 }
-void Core::GameOverAnimation(int y, int x, int endY, int endX, int height, int width) {
 
-	int radius = max(height, width);
-
-	vector<vector<Pixel>> screen(height, vector<Pixel>(width, Pixel()));
-
-	for (int k = 0; k < radius; k++) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				//x^2+y^2=z^2
-			}
-		}
-	}
-
-	
-	
-	cin >> radius;
-}
 Core::Core() {
 	//set up console
 	SetConsole();
 	//initialize random seed
 	srand(time(NULL));
+
+
 	//set graphics handler data
 	GraphicsLib::SetData(mHeight, mWidth);
 	//start graphics handler
 	thread graphicsWorker(&GraphicsLib::HandleGraphics, &mFPS, &mGameIsRunning);
 	graphicsWorker.detach();
+
 }
 void Core::Demo(){
 	//demonstration of how to use graphics and input libraries and what they can do

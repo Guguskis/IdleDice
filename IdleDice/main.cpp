@@ -27,6 +27,6 @@ int main() {
 
 	Core core;
 
-	core.Run();
+	core.RunGameCore();
 	//core.Test();
 }

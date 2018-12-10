@@ -13,23 +13,25 @@ class Core:
 	private Logging
 {
 private:
-	int mHeight = 30, mWidth = 60;
+	int mHeight = 30, mWidth = 65;
 	int mFPS = 60;
-
 
 	bool mGameIsRunning = true;
 
+	vector<pair<string, int>> mScores;
 
 private:
+	void WriteScore();
+	void LoadScore();
+	void InsertScore(int);
 	void SetConsole();
-	void GameOverAnimation(int, int, int, int, int, int);
-	void Minigame3(int, int, bool*);
-
+	void StartMenu();
 
 public:
 	void Test();
 	void Demo();
-	void Run();
+	void RunGameCore();
+	void RunGame();
 	Core();
 };
 

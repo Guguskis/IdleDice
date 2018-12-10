@@ -114,7 +114,7 @@ void MinigameLaser::GameLogic() {
 			text += string(lives / 2, ':');
 			text += string(lives % 2, '.');
 		}
-		InsertLine(mY, mX, text + "  ", col_noColor, col_cyan);
+		InsertLine(mY, mX, text + "  ", col_noColor, col_black);
 
 		if (lives <= 0)
 			mIsRunning = false;
@@ -132,12 +132,21 @@ void MinigameLaser::GameLogic() {
 }
 
 void MinigameLaser::Run(){
+	//delay game start
+	Starter();
+	//display controls
+	string goal = "Goal:   you control laser.  Burn red, don't burn green.";
+	string controls = "Controls: space";
+
+	DrawGuide(goal, controls, 5);
+
 	thread inputWorker(&MinigameLaser::GameControl, this);
 	thread gameWorker(&MinigameLaser::GameLogic, this);
 
 	inputWorker.join();
 	gameWorker.join();
 
+	GameOverAnimation();
 	*mGameEngineIsRunning = false;
 }
 
@@ -147,6 +156,8 @@ MinigameLaser::MinigameLaser(
 	bool *gameEngineIsRunning)
 	: MinigameEngine(y, x, height, width, frameColor, tickTime, tickSpeed, gameEngineIsRunning)
 {
+	minTickTime = 100;
+	mStartTimer = 40;
 }
 
 MinigameLaser::MinigameLaser(){

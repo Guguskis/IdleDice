@@ -127,12 +127,22 @@ void MinigamePianoTiles::GameControl() {
 	}
 }
 void MinigamePianoTiles::Run() {
+	//delay start
+	Starter();
+
+	//display controls
+	string goal = "Goal: press corresponding   key when it's on green line";
+	string controls = "Controls:       Numbers: 1-4";
+
+	DrawGuide(goal, controls, 5);
+
 	thread inputWorker(&MinigamePianoTiles::GameControl, this);
 	thread gameWorker(&MinigamePianoTiles::GameLogic, this);
 
 	inputWorker.join();
 	gameWorker.join();
 
+	GameOverAnimation();
 	*mGameEngineIsRunning = false;
 }
 
@@ -142,6 +152,8 @@ MinigamePianoTiles::MinigamePianoTiles(
 	bool *gameEngineIsRunning)
 	: MinigameEngine(y, x, height, width, frameColor, tickTime, tickSpeed, gameEngineIsRunning)
 {
+	minTickTime = 50;
+	mStartTimer = 20;
 }
 MinigamePianoTiles::MinigamePianoTiles() {
 

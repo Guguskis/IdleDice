@@ -7,7 +7,7 @@ class MinigamePianoTiles :
 	private MinigameEngine
 {
 private:
-	int noteFrequency = 8;
+	int noteFrequency = 12;
 	int lives = 9;
 	int maxLives = lives;
 	int greenLines = 3;

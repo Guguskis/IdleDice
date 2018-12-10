@@ -8,7 +8,7 @@ class MinigameCars:
 {
 private:
 	int carX=0;
-	int obstacleFrequency = 4;
+	int obstacleFrequency = 6;
 	int extraObstacleChance = 15;
 
 	void GameControl();

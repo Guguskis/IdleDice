@@ -143,13 +143,24 @@ void MinigameCars::GameLogic() {
 
 
 void MinigameCars::Run() {
+	//delay game start
+	Starter();
+
+	//display controls
+	string goal = "Goal:   avoid   obstacles.";
+	string controls = "Controls:       left/   right";
+
+	DrawGuide(goal, controls, 5);
+
 	thread inputWorker(&MinigameCars::GameControl, this);
 	thread gameWorker(&MinigameCars::GameLogic, this);
 
 	inputWorker.join();
 	gameWorker.join();
 
+	GameOverAnimation();
 	*mGameEngineIsRunning = false;
+
 }
 
 
@@ -161,6 +172,8 @@ MinigameCars::MinigameCars(
 	: MinigameEngine(y, x, height, width, frameColor, tickTime, tickSpeed, gameEngineIsRunning)
 {
 	carX = (width - 2) / 2;
+	minTickTime = 150;
+	mStartTimer = 0;
 }
 MinigameCars::MinigameCars(){
 }

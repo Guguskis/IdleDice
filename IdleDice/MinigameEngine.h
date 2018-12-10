@@ -26,9 +26,14 @@ protected:
 	double mTickSpeed = 0.97f;
 	int mTicksPassed = 0;
 
+	int mStartTimer=5;
+
 protected:
 	void DrawFrame();
 	void UpdateGraphics();
+	void DrawGuide(string, string, int);
+	void GameOverAnimation();
+	void Starter();
 
 public:
 	void MinigameTest();

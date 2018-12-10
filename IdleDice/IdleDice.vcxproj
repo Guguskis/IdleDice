@@ -139,6 +139,8 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="StartMenuAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h" />
@@ -151,6 +153,8 @@
     <ClInclude Include="MinigameLaser.h" />
     <ClInclude Include="MinigamePianoTiles.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="StartMenuAnimation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

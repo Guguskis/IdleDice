@@ -113,7 +113,7 @@ void GraphicsLib::InsertArray(int y, int x, vector<vector<Pixel>> arr) {
 void GraphicsLib::InsertTextBox(int y, int x, string text, int height, int width, int bgCol, int fgCol) {
 	//parse InsertTextBox command to command vector
 	Command comm;
-	comm.text = "TextBox";
+	comm.type = "TextBox";
 	comm.y = y;
 	comm.x = x;
 	comm.text = text;
@@ -205,7 +205,7 @@ void GraphicsLib::HandleTextBox(int y, int x, string text, int height, int width
 
 	//making lines to be equal size
 	for (int i = 0; i < height; i++) {
-		if (textBox.size() < i) textBox.push_back(string());
+		if (textBox.size() < height) textBox.push_back(string());
 		textBox[i] += string(width - textBox[i].size(), ' ');
 	}
 

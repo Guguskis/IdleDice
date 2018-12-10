@@ -18,6 +18,9 @@
     <Filter Include="Minigames">
       <UniqueIdentifier>{e3f29d62-59aa-4570-ac48-0f77d82d9af2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="StartMenu">
+      <UniqueIdentifier>{b639e648-f8f9-4bd5-933d-d82baaebcfec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,8 +50,14 @@
     <ClCompile Include="MinigamePianoTiles.cpp">
       <Filter>Minigames</Filter>
     </ClCompile>
-    <ClCompile Include="MinigameLaser.cpp">
+    <ClCompile Include="StartMenuAnimation.cpp">
+      <Filter>StartMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MinigameLaser.cpp">
+      <Filter>Minigames</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,8 +88,14 @@
     <ClInclude Include="MinigamePianoTiles.h">
       <Filter>Minigames</Filter>
     </ClInclude>
-    <ClInclude Include="MinigameLaser.h">
+    <ClInclude Include="StartMenuAnimation.h">
+      <Filter>StartMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MinigameLaser.h">
+      <Filter>Minigames</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
